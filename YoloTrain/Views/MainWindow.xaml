@@ -5,12 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:YoloTrain"
         xmlns:mvvm="clr-namespace:YoloTrain.Mvvm"
+        xmlns:views="clr-namespace:YoloTrain.Views"
         mc:Ignorable="d"
         WindowState="Maximized"
-        Title="MainWindow" Height="450" Width="800">
+        Title="YOLO Train" 
+        Height="450"
+        Width="800"
+        ShowInTaskbar="True"
+>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="50" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="100" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -18,11 +24,13 @@
             <ColumnDefinition Width="280" />
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.Row="1" Margin="10,0,0,0">
+        <views:MainMenu x:Name="MainMenu" Grid.Row="0" Grid.ColumnSpan="2" />
+
+        <Grid Grid.Row="2" Margin="10,0,0,0">
             <Image x:Name="imgTrain"  HorizontalAlignment="Center" VerticalAlignment="Top" Source="F:\spartiates\sharks_vs_ella_3star\sharks_vs_ella_frames\scene01501.png" Cursor="Cross" MouseDown="imgTrain_MouseDown" MouseUp="imgTrain_MouseUp" MouseMove="imgTrain_MouseMove" />
         </Grid>
 
-        <Grid Grid.Row="1" Grid.Column="1" Margin="10,0">
+        <Grid Grid.Row="2" Grid.Column="1" Margin="10,0">
             <StackPanel>
                 <Image x:Name="imgPreview" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,10" />
                 <StackPanel>

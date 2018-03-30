@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Drawing;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using YoloTrain.Mvvm;
+using YoloTrain.Mvvm.ApplicationServices;
 using Point = System.Windows.Point;
 
 namespace YoloTrain.Views
@@ -26,6 +28,14 @@ namespace YoloTrain.Views
             InitializeComponent();
 
             _viewModel = viewModel;
+            HandleEscape = false;
+        }
+
+        protected override void OnInitialized(EventArgs e)
+        {
+            base.OnInitialized(e);
+
+            KeyBindingHelper.SetKeyBindings(this, MainMenu.Menu.Items);
         }
 
         private void imgTrain_MouseDown(object sender, MouseButtonEventArgs e)
