@@ -1,35 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using YoloTrain.Mvvm;
+using Point = System.Windows.Point;
 
-namespace YoloTrain
+namespace YoloTrain.Views
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : WindowView
     {
+        private readonly IMainWindowViewModel _viewModel;
+
         private Point _origMouseDownPoint;
         private bool _isLeftMouseButtonDown;
         private double x, y, width, height;
-        private System.Drawing.Bitmap _img;
 
-        public MainWindow()
+        public MainWindow(IMainWindowViewModel viewModel)
+            : base(viewModel)
         {
             InitializeComponent();
 
-            _img = new System.Drawing.Bitmap(System.Drawing.Image.FromFile(@"F:\spartiates\sharks_vs_ella_3star\sharks_vs_ella_frames\scene01501.png"));
+            _viewModel = viewModel;
         }
 
         private void imgTrain_MouseDown(object sender, MouseButtonEventArgs e)
@@ -55,16 +51,17 @@ namespace YoloTrain
                 e.Handled = true;
 
                 var imgOffset = GetAbsolutePlacement(imgTrain);
+                var img = _viewModel.CurrentImage;
 
                 var realx = x - imgOffset.X;
                 var realy = y - imgOffset.Y;
-                var scaley = _img.Height / imgTrain.ActualHeight;
-                var scalex = _img.Width / imgTrain.ActualWidth;
+                var scaley = img.Height / imgTrain.ActualHeight;
+                var scalex = img.Width / imgTrain.ActualWidth;
                 var imgy = realy * scaley;
                 var imgx = realx * scalex;
 
-                var rect = new System.Drawing.Rectangle((int)imgx, (int)imgy, (int)(width * scalex), (int)(height * scaley));
-                var bmp = new System.Drawing.Bitmap(_img);
+                var rect = new Rectangle((int)imgx, (int)imgy, (int)(width * scalex), (int)(height * scaley));
+                var bmp = new Bitmap(img);
                 var newImg = bmp.Clone(rect, bmp.PixelFormat);
                 newImg.Save(@"f:\crop.bmp");
             }
@@ -112,10 +109,12 @@ namespace YoloTrain
 
                 dragSelectionCanvas.Visibility = Visibility.Visible;
 
+                var img = _viewModel.CurrentImage;
+
                 var realx = x - imgOffset.X;
                 var realy = y - imgOffset.Y;
-                var scaley = _img.Height / imgTrain.ActualHeight;
-                var scalex = _img.Width / imgTrain.ActualWidth;
+                var scaley = img.Height / imgTrain.ActualHeight;
+                var scalex = img.Width / imgTrain.ActualWidth;
 
                 int imgy = (int)(realy * scaley);
                 int imgx = (int)(realx * scalex);
@@ -131,21 +130,21 @@ namespace YoloTrain
                 }
 
                 double dataX, dataY, dataHeight, dataWidth;
-                dataX = (rwidth / 2.0 + imgx) / (double)_img.Width;
-                dataY = (rheight / 2.0 + imgy) / (double)_img.Height;
-                dataHeight = (double)rheight / _img.Height;
-                dataWidth = (double)rwidth / _img.Width;
+                dataX = (rwidth / 2.0 + imgx) / (double)img.Width;
+                dataY = (rheight / 2.0 + imgy) / (double)img.Height;
+                dataHeight = (double)rheight / img.Height;
+                dataWidth = (double)rwidth / img.Width;
 
-                rwidth = (int)(dataWidth * _img.Width);
-                rheight = (int)(dataHeight * _img.Height);
-                imgx = (int)(dataX * _img.Width - rwidth / 2.0);
-                imgy = (int)(dataY * _img.Height - rheight / 2.0);
+                rwidth = (int)(dataWidth * img.Width);
+                rheight = (int)(dataHeight * img.Height);
+                imgx = (int)(dataX * img.Width - rwidth / 2.0);
+                imgy = (int)(dataY * img.Height - rheight / 2.0);
 
                 txtCoords.Text = string.Format("x: {0:0.000000} y: {1:0.000000} w: {2:0.000000} h: {3:0.000000}", dataX, dataY, dataWidth, dataHeight);
 
-                var rect = new System.Drawing.Rectangle(imgx, imgy, rwidth, rheight);
+                var rect = new Rectangle(imgx, imgy, rwidth, rheight);
                 //var bmp = new System.Drawing.Bitmap(_img);
-                var newImg = _img.Clone(rect, _img.PixelFormat);
+                var newImg = img.Clone(rect, img.PixelFormat);
 
                 var bmpsource = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
                    newImg.GetHbitmap(),

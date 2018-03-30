@@ -1,9 +1,10 @@
-﻿<Window x:Class="YoloTrain.MainWindow"
+﻿<mvvm:WindowView x:Class="YoloTrain.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:YoloTrain"
+        xmlns:mvvm="clr-namespace:YoloTrain.Mvvm"
         mc:Ignorable="d"
         WindowState="Maximized"
         Title="MainWindow" Height="450" Width="800">
@@ -48,4 +49,5 @@
         </Canvas>
 
     </Grid>
-</Window>
+</mvvm:WindowView>
+
