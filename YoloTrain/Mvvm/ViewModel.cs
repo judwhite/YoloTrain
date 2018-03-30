@@ -35,12 +35,6 @@ namespace YoloTrain.Mvvm
     /// </summary>
     public abstract class ViewModel : IViewModel
     {
-        /// <summary>Dispatcher service.</summary>
-        protected static readonly IDispatcher _dispatcher;
-
-        /// <summary>Dialog service.</summary>
-        protected static readonly IDialogService _dialogService;
-
         /// <summary>Occurs when a property value changes.</summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -54,12 +48,6 @@ namespace YoloTrain.Mvvm
         public event EventHandler<ShowOpenFileDialogEventArgs> ShowOpenFile;
 
         private readonly Dictionary<string, object> _propertyValues = new Dictionary<string, object>();
-
-        static ViewModel()
-        {
-            _dispatcher = IoC.Resolve<IDispatcher>();
-            _dialogService = IoC.Resolve<IDialogService>();
-        }
 
         /// <summary>
         /// Gets or sets the close window action.
@@ -145,14 +133,14 @@ namespace YoloTrain.Mvvm
         /// <param name="action">The action to invoke.</param>
         protected void BeginInvoke(Action action)
         {
-            _dispatcher.BeginInvoke(action);
+            IoC.Resolve<IDispatcher>().BeginInvoke(action);
         }
 
         /// <summary>Determines whether the calling thread is the thread associated with this <see cref="System.Windows.Threading.Dispatcher" />.</summary>
         /// <returns><c>true</c> if the calling thread is the thread associated with this <see cref="System.Windows.Threading.Dispatcher" />; otherwise, <c>false</c>.</returns>
         protected bool CheckAccess()
         {
-            return _dispatcher.CheckAccess();
+            return IoC.Resolve<IDispatcher>().CheckAccess();
         }
 
         /// <summary>Messages the box.</summary>

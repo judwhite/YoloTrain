@@ -18,7 +18,7 @@ namespace YoloTrain.Mvvm
             builder.RegisterInstance<IDialogService>(new DialogService());
 
             // view models
-            builder.RegisterType<MainWindowViewModel>().As<IMainWindowViewModel>();
+            builder.RegisterInstance<IMainWindowViewModel>(new MainWindowViewModel());
 
             // views
             builder.RegisterType<MainWindow>();
