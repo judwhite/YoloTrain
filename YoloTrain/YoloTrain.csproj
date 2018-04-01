@@ -71,6 +71,7 @@
     <Compile Include="Mvvm\CommandManagerHelper.cs" />
     <Compile Include="Mvvm\DelegateCommand.cs" />
     <Compile Include="Mvvm\KeyBindingsHelper.cs" />
+    <Compile Include="Mvvm\Model.cs" />
     <Compile Include="Views\MainMenu.xaml.cs">
       <DependentUpon>MainMenu.xaml</DependentUpon>
     </Compile>
@@ -78,6 +79,10 @@
     <Compile Include="Views\Project\NewProjectViewModel.cs" />
     <Compile Include="Views\Project\NewProjectWindow.xaml.cs">
       <DependentUpon>NewProjectWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Tools\ExtractVideoFramesViewModel.cs" />
+    <Compile Include="Views\Tools\ExtractVideoFramesWindow.xaml.cs">
+      <DependentUpon>ExtractVideoFramesWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="Themes\Default\Brush.xaml">
       <SubType>Designer</SubType>
@@ -107,6 +112,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Views\Project\NewProjectWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Tools\ExtractVideoFramesWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -150,6 +159,44 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\bin\avcodec-58.dll">
+      <Link>avcodec-58.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\bin\avdevice-58.dll">
+      <Link>avdevice-58.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\bin\avfilter-7.dll">
+      <Link>avfilter-7.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\bin\avformat-58.dll">
+      <Link>avformat-58.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\bin\avutil-56.dll">
+      <Link>avutil-56.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\bin\ffmpeg.exe">
+      <Link>ffmpeg.exe</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\bin\postproc-55.dll">
+      <Link>postproc-55.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\bin\swresample-3.dll">
+      <Link>swresample-3.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\bin\swscale-5.dll">
+      <Link>swscale-5.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -40,8 +40,8 @@ namespace YoloTrain.Mvvm
             HandleEscape = true;
             ShowInTaskbar = false;
             WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            FontFamily = new FontFamily("Verdana");
-            FontSize = 11.0d;
+            //FontFamily = new FontFamily("Verdana");
+            //FontSize = 11.0d;
             Background = (Brush)Application.Current.Resources["WindowBackground"];
 
             viewModel.ShowMessageBox += ViewModel_ShowMessageBox;
