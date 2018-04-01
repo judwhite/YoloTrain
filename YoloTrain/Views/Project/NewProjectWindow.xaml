@@ -8,10 +8,11 @@
     xmlns:mvvm="clr-namespace:YoloTrain.Mvvm"
     mc:Ignorable="d"
     Title="New Project" 
-    Height="550" 
+    Height="600" 
     Width="800"
     WindowStartupLocation="CenterOwner"
     FocusManager.FocusedElement="{Binding ElementName=ProjectFileNameTextBox}"
+    ResizeMode="CanMinimize"
 >
     <Grid Margin="16">
         <Grid.RowDefinitions>

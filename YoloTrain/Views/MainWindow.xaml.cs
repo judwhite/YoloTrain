@@ -71,6 +71,8 @@ namespace YoloTrain.Views
                 var imgx = realx * scalex;
 
                 var rect = new Rectangle((int)imgx, (int)imgy, (int)(width * scalex), (int)(height * scaley));
+                if (rect.Width == 0 || rect.Height == 0)
+                    return;
                 var bmp = new Bitmap(img);
                 var newImg = bmp.Clone(rect, bmp.PixelFormat);
                 newImg.Save(@"f:\crop.bmp");
