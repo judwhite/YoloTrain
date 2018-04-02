@@ -7,11 +7,11 @@ using YoloTrain.Mvvm.Events;
 namespace YoloTrain.Mvvm
 {
     /// <summary>
-    /// IViewModelBase
+    /// IViewModel
     /// </summary>
     public interface IViewModel : INotifyPropertyChanged
     {
-        /// <summary>Occurs when MessageBox /> has been called.</summary>
+        /// <summary>Occurs when MessageBox has been called.</summary>
         event EventHandler<ShowMessageBoxEventArgs> ShowMessageBox;
 
         /// <summary>Occurs when ShowWindow has been called.</summary>
@@ -33,7 +33,7 @@ namespace YoloTrain.Mvvm
     }
 
     /// <summary>
-    /// ViewModelBase
+    /// ViewModel
     /// </summary>
     public abstract class ViewModel : Model, IViewModel
     {
@@ -59,11 +59,8 @@ namespace YoloTrain.Mvvm
         /// <value>The current visual state.</value>
         public string CurrentVisualState
         {
-            get { return Get<string>("CurrentVisualState"); }
-            set
-            {
-                BeginInvoke(() => Set("CurrentVisualState", value));
-            }
+            get => Get<string>("CurrentVisualState");
+            set => BeginInvoke(() => Set("CurrentVisualState", value));
         }
 
         /// <summary>Invokes the specified action on the UI thread.</summary>
