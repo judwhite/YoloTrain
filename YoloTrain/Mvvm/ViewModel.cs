@@ -132,7 +132,7 @@ namespace YoloTrain.Mvvm
 
         /// <summary>Shows the open file dialog.</summary>
         /// <param name="title">The dialog title.</param>
-        /// <param name="filter">The file filter.</param>
+        /// <param name="filter">The file filter. For example, Text files (*.txt)|*.txt|All files (*.*)|*.*</param>
         /// <param name="fileName">Name of the file opened.</param>
         /// <returns><c>true</c> if a file is selected.</returns>
         protected bool? ShowOpenFileDialog(string title, string filter, out string fileName)

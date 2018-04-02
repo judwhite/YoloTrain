@@ -11,7 +11,7 @@ namespace YoloTrain.Mvvm.Events
         /// <value>The title.</value>
         public string Title { get; set; }
 
-        /// <summary>Gets or sets the filter.</summary>
+        /// <summary>Gets or sets the filter. For example, Text files (*.txt)|*.txt|All files (*.*)|*.*</summary>
         /// <value>The filter.</value>
         public string Filter { get; set; }
 
