@@ -1,4 +1,4 @@
-﻿<mvvm:WindowView
+<mvvm:WindowView
     x:Class="YoloTrain.Views.Project.NewProjectWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -8,7 +8,7 @@
     xmlns:mvvm="clr-namespace:YoloTrain.Mvvm"
     mc:Ignorable="d"
     Title="New Project" 
-    Height="600" 
+    Height="640" 
     Width="800"
     WindowStartupLocation="CenterOwner"
     FocusManager.FocusedElement="{Binding ElementName=ProjectFileNameTextBox}"
@@ -26,91 +26,130 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <Label Grid.Row="0" Content="File name" />
-            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
-                <TextBox x:Name="ProjectFileNameTextBox" Height="20" Width="300" Text="{Binding ProjectFileName}" />
-                <Button Margin="8,0,0,0" Content="New" Height="20" Width="60" Command="{Binding NewProjectFileCommand}" />
-                <Button Margin="8,0,0,0" Content="Load" Height="20" Width="60" Command="{Binding LoadProjectFileCommand}" />
-            </StackPanel>
+            <!-- Project -->
+            <Grid Grid.Row="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
-            <Label Grid.Row="1" Content="darknet.exe Location" />
-            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
-                <TextBox Height="20" Width="300" Text="{Binding DarknetExecutable}"/>
-                <Button Margin="8,0,0,0" Content="Find" Height="20" Width="60" Command="{Binding FindDarknetExecutableCommand}" />
-            </StackPanel>
+                <Label Grid.Row="0" Content="Project Name" />
+                <TextBox x:Name="ProjectFileNameTextBox" Grid.Row="0" Grid.Column="1" Height="20" Width="300" HorizontalAlignment="Left" Text="{Binding ProjectFileName}" />
 
-            <Label Grid.Row="2" Content="YOLO config" />
-            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
-                <TextBox Height="20" Width="300" Text="{Binding YoloConfigFile}"/>
-                <Button Margin="8,0,0,0" Content="New" Height="20" Width="60" Command="{Binding NewYoloConfigCommand}" />
-                <Button Margin="8,0,0,0" Content="Load" Height="20" Width="60" Command="{Binding LoadYoloConfigCommand}" />
-            </StackPanel>
+                <Label Grid.Row="1" Content="Project Directory" />
+                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+                    <TextBox Height="20" Width="300" Text="{Binding ProjectDirectory}" />
+                    <Button Margin="8,0,0,0" Content="Browse..." Height="20" Width="80" Command="{Binding SelectProjectDirectoryCommand}" />
+                </StackPanel>
 
-            <Label Margin="16,0,0,0" Grid.Row="3" Content="Batch size" />
-            <TextBox Grid.Row="3" Grid.Column="1" Width="80" Height="20" HorizontalAlignment="Left" Text="{Binding BatchSize}" />
+                <Label Grid.Row="2" Grid.Column="0" Content="darknet.exe Location" />
+                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
+                    <TextBox Height="20" Width="300" Text="{Binding DarknetExecutable}"/>
+                    <Button Margin="8,0,0,0" Content="Browse..." Height="20" Width="80" Command="{Binding FindDarknetExecutableCommand}" />
+                </StackPanel>
+            </Grid>
 
-            <Label Margin="16,0,0,0" Grid.Row="4" Content="Subdivisions" />
-            <TextBox Grid.Row="4" Grid.Column="1" Width="80" Height="20" HorizontalAlignment="Left" Text="{Binding Subdivisions}"/>
+            <!-- YOLO Config -->
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
-            <Label Margin="16,0,0,0" Grid.Row="5" Content="Height" />
-            <TextBox Grid.Row="5" Grid.Column="1" Width="80" Height="20" HorizontalAlignment="Left" Text="{Binding Height}"/>
+                <Label Grid.Row="0" Content="YOLOv3 Config" />
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                    <TextBox Height="20" Width="300" Text="{Binding YoloConfigFile}"/>
+                    <Button Margin="8,0,0,0" Content="Browse..." Height="20" Width="80" Command="{Binding LoadYoloConfigCommand}" />
+                </StackPanel>
 
-            <Label Margin="16,0,0,0" Grid.Row="6" Content="Width" />
-            <TextBox Grid.Row="6" Grid.Column="1" Width="80" Height="20" HorizontalAlignment="Left" Text="{Binding Width}"/>
+                <Label Margin="16,0,0,0" Grid.Row="1" Grid.Column="0" Content="Batch Size" />
+                <TextBox Grid.Row="1" Grid.Column="1" Width="80" Height="20" HorizontalAlignment="Left" Text="{Binding BatchSize, Converter={StaticResource NullableIntConverter}}" />
 
-            <Label Margin="16,0,0,0" Grid.Row="7" Content="Filters" />
-            <TextBox Grid.Row="7" Grid.Column="1" Width="80" Height="20" HorizontalAlignment="Left" Text="{Binding Filters}" IsEnabled="False"/>
+                <Label Margin="16,0,0,0" Grid.Row="2" Grid.Column="0" Content="Subdivisions" />
+                <TextBox Grid.Row="2" Grid.Column="1" Width="80" Height="20" HorizontalAlignment="Left" Text="{Binding Subdivisions, Converter={StaticResource NullableIntConverter}}"/>
 
-            <Label Margin="16,0,0,0" Grid.Row="8" Content="Anchors" />
-            <StackPanel Grid.Row="8" Grid.Column="1"  Orientation="Horizontal">
-                <TextBox Width="300" Height="20" HorizontalAlignment="Left" Text="{Binding Anchors}"/>
-                <Button Margin="8,0,0,0" Content="Detect" Height="20" Width="60" Command="{Binding DetectAnchorsCommand}" />
-            </StackPanel>
+                <Label Margin="16,0,0,0" Grid.Row="3" Grid.Column="0" Content="Height/Width" />
+                <ComboBox Grid.Row="3" Grid.Column="1" Width="80" Height="20" HorizontalAlignment="Left" Text="{Binding HeightWidth, Converter={StaticResource NullableIntConverter}, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" IsEditable="True">
+                    <ComboBox.Items>
+                        <ComboBoxItem Content="416" />
+                        <ComboBoxItem Content="512" />
+                        <ComboBoxItem Content="608" />
+                        <ComboBoxItem Content="704" />
+                        <ComboBoxItem Content="832" />
+                        <ComboBoxItem Content="1056" />
+                    </ComboBox.Items>
+                </ComboBox>
 
-            <Label Margin="16,0,0,0" Grid.Row="9" Content="Classes" />
-            <TextBox Grid.Row="9" Grid.Column="1" Width="80" Height="20" HorizontalAlignment="Left" Text="{Binding Classes}"/>
+                <Label Margin="16,0,0,0" Grid.Row="4" Grid.Column="0" Content="Filters" />
+                <TextBox Grid.Row="4" Grid.Column="1" Width="80" Height="20" HorizontalAlignment="Left" Text="{Binding Filters}" IsReadOnly="True" Background="#CCC"/>
 
-            <Label Margin="16,0,0,0" Grid.Row="10" Content="Random" />
-            <CheckBox Grid.Row="10" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left" IsChecked="{Binding IsRandomChecked}"/>
+                <Label Margin="16,0,0,0" Grid.Row="5" Grid.Column="0" Content="Anchors" />
+                <StackPanel Grid.Row="5" Grid.Column="1"  Orientation="Horizontal">
+                    <TextBox Width="300" Height="20" HorizontalAlignment="Left" Text="{Binding Anchors}"/>
+                    <Button Margin="8,0,0,0" Content="Update..." Height="20" Width="80" Command="{Binding DetectAnchorsCommand}" />
+                </StackPanel>
 
-            <Label Grid.Row="11" Content="obj.data location" />
-            <StackPanel Grid.Row="11" Grid.Column="1" Orientation="Horizontal">
-                <TextBox Height="20" Width="300" Text="{Binding YoloConfigFile}"/>
-                <Button Margin="8,0,0,0" Content="New" Height="20" Width="60" Command="{Binding NewObjDataCommand}" />
-                <Button Margin="8,0,0,0" Content="Load" Height="20" Width="60" Command="{Binding LoadObjDataCommand}" />
-            </StackPanel>
+                <Label Margin="16,0,0,0" Grid.Row="6" Grid.Column="0" Content="Classes" />
+                <TextBox Grid.Row="6" Grid.Column="1" Width="80" Height="20" HorizontalAlignment="Left" Text="{Binding Classes, Converter={StaticResource NullableIntConverter}}"/>
 
-            <Label Margin="16,0,0,0" Grid.Row="12" Content="Train" />
-            <TextBox Grid.Row="12" Grid.Column="1" Width="300" Height="20" HorizontalAlignment="Left" Text="{Binding TrainFileName}"/>
+                <Label Margin="16,0,0,0" Grid.Row="7" Grid.Column="0" Content="Random" />
+                <CheckBox Grid.Row="7" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left" IsChecked="{Binding IsRandomChecked}"/>
 
-            <Label Margin="16,0,0,0" Grid.Row="13" Content="Valid" />
-            <TextBox Grid.Row="13" Grid.Column="1" Width="300" Height="20" HorizontalAlignment="Left" Text="{Binding ValidFileName}"/>
+            </Grid>
 
-            <Label Margin="16,0,0,0" Grid.Row="14" Content="Names" />
-            <TextBox Grid.Row="14" Grid.Column="1" Width="300" Height="20" HorizontalAlignment="Left" Text="{Binding ClassNamesFileName}"/>
+            <!-- obj.data -->
+            <Grid Grid.Row="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
-            <Label Margin="16,0,0,0" Grid.Row="15" Content="Backup" />
-            <TextBox Grid.Row="15" Grid.Column="1" Width="300" Height="20" HorizontalAlignment="Left" Text="{Binding BackupFolder}" />
+                <Label Grid.Row="0" Content="obj.data Location" />
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                    <TextBox Height="20" Width="300" Text="{Binding ObjDataFile}"/>
+                    <Button Margin="8,0,0,0" Content="Browse..." Height="20" Width="80" Command="{Binding LoadObjDataCommand}" />
+                </StackPanel>
+
+                <Label Margin="16,0,0,0" Grid.Row="1" Grid.Column="0" Content="Train" />
+                <TextBox Grid.Row="1" Grid.Column="1" Width="300" Height="20" HorizontalAlignment="Left" Text="{Binding TrainFileName}"/>
+
+                <Label Margin="16,0,0,0" Grid.Row="2" Grid.Column="0" Content="Valid" />
+                <TextBox Grid.Row="2" Grid.Column="1" Width="300" Height="20" HorizontalAlignment="Left" Text="{Binding ValidFileName}"/>
+
+                <Label Margin="16,0,0,0" Grid.Row="3" Grid.Column="0" Content="Names" />
+                <TextBox Grid.Row="3" Grid.Column="1" Width="300" Height="20" HorizontalAlignment="Left" Text="{Binding ClassNamesFileName}"/>
+
+                <Label Margin="16,0,0,0" Grid.Row="4" Grid.Column="0" Content="Backup Directory" />
+                <TextBox Grid.Row="4" Grid.Column="1" Width="300" Height="20" HorizontalAlignment="Left" Text="{Binding BackupFolder}" />
+            </Grid>
         </Grid>
 
         <Separator Grid.Row="1" Margin="0,8" />
