@@ -78,6 +78,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Config\ObjectDataConfig.cs" />
+    <Compile Include="Config\ObjectNamesConfig.cs" />
+    <Compile Include="Config\YoloProject.cs" />
+    <Compile Include="Config\YoloTrainSettings.cs" />
     <Compile Include="Converters\NullableIntConverter.cs" />
     <Compile Include="Mvvm\CommandManagerHelper.cs" />
     <Compile Include="Mvvm\DelegateCommand.cs" />
