@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using Microsoft.Win32;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace YoloTrain.Mvvm.ApplicationServices
 {
@@ -27,6 +28,30 @@ namespace YoloTrain.Mvvm.ApplicationServices
             }
 
             return window.ShowDialog();
+        }
+
+        public bool? ShowSelectFolderDialog(Window owner, out string directoryName)
+        {
+            CommonOpenFileDialog cfd;
+            MouseHelper.SetWaitCursor();
+            try
+            {
+                cfd = new CommonOpenFileDialog();
+                cfd.InitialDirectory = @"C:\";
+                cfd.IsFolderPicker = true;
+            }
+            finally
+            {
+                MouseHelper.ResetCursor();
+            }
+
+            var result = cfd.ShowDialog(owner);
+            if (result == CommonFileDialogResult.Ok)
+                directoryName = cfd.FileName;
+            else
+                directoryName = null;
+
+            return !string.IsNullOrWhiteSpace(directoryName);
         }
 
         public bool? ShowOpenFileDialog(Window owner, string title, string filter, out string fileName)

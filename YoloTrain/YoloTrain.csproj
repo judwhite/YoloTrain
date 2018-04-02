@@ -81,6 +81,7 @@
     <Compile Include="Converters\NullableIntConverter.cs" />
     <Compile Include="Mvvm\CommandManagerHelper.cs" />
     <Compile Include="Mvvm\DelegateCommand.cs" />
+    <Compile Include="Mvvm\Events\ShowSelectFolderDialogEventArgs.cs" />
     <Compile Include="Mvvm\KeyBindingsHelper.cs" />
     <Compile Include="Mvvm\Model.cs" />
     <Compile Include="Views\MainMenu.xaml.cs">

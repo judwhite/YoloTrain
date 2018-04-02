@@ -27,5 +27,11 @@ namespace YoloTrain.Mvvm.ApplicationServices
         /// <param name="fileName">Name of the file opened.</param>
         /// <returns><c>true</c> if a file is selected.</returns>
         bool? ShowOpenFileDialog(Window owner, string title, string filter, out string fileName);
+
+        /// <summary>Shows the select folder dialog.</summary>
+        /// <param name="owner">The owner.</param>
+        /// <param name="directoryName">Name of the directory selected.</param>
+        /// <returns><c>true</c> if a directory is selected.</returns>
+        bool? ShowSelectFolderDialog(Window owner, out string directoryName);
     }
 }

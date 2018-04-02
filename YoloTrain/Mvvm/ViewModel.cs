@@ -20,6 +20,9 @@ namespace YoloTrain.Mvvm
         /// <summary>Occurs when ShowOpenFileDialog has been called.</summary>
         event EventHandler<ShowOpenFileDialogEventArgs> ShowOpenFile;
 
+        /// <summary>Occurs when ShowSelectFolderDialog has been called.</summary>
+        event EventHandler<ShowSelectFolderDialogEventArgs> ShowSelectFolder;
+
         /// <summary>Gets or sets the close window action.</summary>
         /// <value>The close window action.</value>
         Action<bool?> CloseWindow { get; set; }
@@ -42,6 +45,9 @@ namespace YoloTrain.Mvvm
 
         /// <summary>Occurs when ShowOpenFileDialog has been called.</summary>
         public event EventHandler<ShowOpenFileDialogEventArgs> ShowOpenFile;
+
+        /// <summary>Occurs when ShowSelectFolderDialog has been called.</summary>
+        public event EventHandler<ShowSelectFolderDialogEventArgs> ShowSelectFolder;
 
         /// <summary>
         /// Gets or sets the close window action.
@@ -155,6 +161,27 @@ namespace YoloTrain.Mvvm
                 fileName = null;
 
             return showOpenFileDialogEvent.Result;
+        }
+
+        /// <summary>Shows the select folder dialog.</summary>
+        /// <param name="directoryName">Name of the directory selected.</param>
+        /// <returns><c>true</c> if a directory is selected.</returns>
+        protected bool? ShowSelectFolderDialog(out string directoryName)
+        {
+            var showSelectFolderDialogEventArgs = new ShowSelectFolderDialogEventArgs();
+
+            var handler = ShowSelectFolder;
+            if (handler != null)
+                handler(this, showSelectFolderDialogEventArgs);
+            else
+                throw new Exception("'ShowSelectFolder' event is not subscribed to.");
+
+            if (showSelectFolderDialogEventArgs.Result == true)
+                directoryName = showSelectFolderDialogEventArgs.SelectedDirectory;
+            else
+                directoryName = null;
+
+            return showSelectFolderDialogEventArgs.Result;
         }
     }
 }

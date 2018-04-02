@@ -47,6 +47,7 @@ namespace YoloTrain.Mvvm
             viewModel.ShowMessageBox += ViewModel_ShowMessageBox;
             viewModel.ShowDialogWindow += ViewModel_ShowDialogWindow;
             viewModel.ShowOpenFile += ViewModel_ShowOpenFile;
+            viewModel.ShowSelectFolder += ViewModel_ShowSelectFolder;
         }
 
         private void ViewModel_ShowOpenFile(object sender, ShowOpenFileDialogEventArgs e)
@@ -57,6 +58,17 @@ namespace YoloTrain.Mvvm
             string fileName;
             bool? result = _dialogService.ShowOpenFileDialog(this, e.Title, e.Filter, out fileName);
             e.FileName = fileName;
+            e.Result = result;
+        }
+
+        private void ViewModel_ShowSelectFolder(object sender, ShowSelectFolderDialogEventArgs e)
+        {
+            if (e == null)
+                throw new ArgumentNullException(nameof(e));
+
+            string directoryName;
+            bool? result = _dialogService.ShowSelectFolderDialog(this, out directoryName);
+            e.SelectedDirectory = directoryName;
             e.Result = result;
         }
 
