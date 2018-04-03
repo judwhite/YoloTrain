@@ -198,6 +198,14 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Content Include="..\bin\obj.data.template">
+      <Link>darknet\obj.data.template</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\bin\yolov3.cfg.template">
+      <Link>darknet\yolov3.cfg.template</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
     <None Include="Themes\Default\DataGrid.Row">
       <Generator>MSBuild:Compile</Generator>
