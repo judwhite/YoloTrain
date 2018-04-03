@@ -62,15 +62,15 @@ namespace YoloTrain.Mvvm
                 hasChanged = true;
             }
 
-            if (hasChanged)
-            {
-                if (keyExists)
-                    _propertyValues[propertyName] = value;
-                else
-                    _propertyValues.Add(propertyName, value);
+            if (!hasChanged)
+                return;
 
-                RaisePropertyChanged(propertyName, oldValue, value);
-            }
+            if (keyExists)
+                _propertyValues[propertyName] = value;
+            else
+                _propertyValues.Add(propertyName, value);
+
+            RaisePropertyChanged(propertyName, oldValue, value);
         }
     }
 }
