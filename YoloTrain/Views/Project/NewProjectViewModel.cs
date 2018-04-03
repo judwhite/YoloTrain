@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Windows.Input;
+using YoloTrain.Config;
 using YoloTrain.Mvvm;
 
 namespace YoloTrain.Views.Project
@@ -13,7 +14,6 @@ namespace YoloTrain.Views.Project
         ICommand FindDarknetExecutableCommand { get; }
 
         ICommand LoadYoloConfigCommand { get; }
-        ICommand DetectAnchorsCommand { get; }
         ICommand LoadObjDataCommand { get; }
 
         ICommand SaveCommand { get; }
@@ -27,14 +27,11 @@ namespace YoloTrain.Views.Project
         string DarknetExecutable { get; set; }
 
         string YoloConfigFile { get; set; }
-        int BatchSize { get; set; }
-        int Subdivisions { get; set; }
-        int HeightWidth { get; set; }
-        int Filters { get; set; }
-        string Anchors { get; set; }
-        int Classes { get; set; }
+        int? BatchSize { get; set; }
+        int? Subdivisions { get; set; }
+        int? HeightWidth { get; set; }
         bool IsRandomChecked { get; set; }
-        bool IsDetectEnabled { get; }
+        int? MaxObjects { get; set; }
 
         string ObjDataFile { get; set; }
         string TrainFileName { get; set; }
@@ -74,6 +71,34 @@ namespace YoloTrain.Views.Project
             });
 
             SetDefaults();
+
+            SaveCommand = new DelegateCommand(Save);
+        }
+
+        private void Save()
+        {
+            // TODO (judwhite): finish
+
+            var project = new YoloProject
+            {
+                Version = 1,
+                YoloVersion = "3",
+                DarknetExecutableFilePath = DarknetExecutable,
+                TrainYoloConfigFilePath = YoloConfigFile,
+                ObjectDataFilePath = ObjDataFile
+            };
+
+            var yoloConfig = new YoloTrainSettings
+            {
+                Version = 1,
+                RecentProjects = new List<string> { Path.Combine(ProjectDirectory, ProjectFileName) }
+            };
+
+            /*var anchors = "10,13,  16,30,  33,23,  30,61,  62,45,  59,119,  116,90,  156,198,  373,326";
+            var classes = 0;
+            var filters = (classes + 5) * 3;*/
+
+            CloseWindow(true);
         }
 
         private void NewProjectViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -90,18 +115,53 @@ namespace YoloTrain.Views.Project
                 }
             }
 
-            if (e.PropertyName == nameof(Classes))
+            if (e.PropertyName == nameof(HeightWidth) && HeightWidth != null)
             {
-                if (Classes < 0)
-                {
-                    return;
-                }
-                Filters = (Classes + 5) * 5;
+                HeightWidth = FindClosestInt(HeightWidth.Value, 32);
             }
 
-            if (e.PropertyName == nameof(HeightWidth))
+            if ((e.PropertyName == nameof(ProjectFileName) || e.PropertyName == nameof(DarknetExecutable)) &&
+                !string.IsNullOrWhiteSpace(ProjectFileName) &&
+                !string.IsNullOrWhiteSpace(DarknetExecutable))
             {
-                HeightWidth = FindClosestInt(HeightWidth, 32);
+                var darknetDirectory = Path.GetDirectoryName(DarknetExecutable);
+                var projectName = Path.GetFileNameWithoutExtension(ProjectFileName);
+                if (!projectName.EndsWith("-yolov3"))
+                    projectName += "-yolov3";
+
+                if (string.IsNullOrWhiteSpace(YoloConfigFile))
+                {
+                    YoloConfigFile = Path.Combine(darknetDirectory, projectName + ".cfg");
+                }
+
+                if (string.IsNullOrWhiteSpace(ObjDataFile))
+                {
+                    ObjDataFile = Path.Combine(darknetDirectory, projectName + "-data", "obj.data");
+                }
+            }
+
+            if (e.PropertyName == nameof(YoloConfigFile) && !string.IsNullOrWhiteSpace(YoloConfigFile))
+            {
+                // TODO (judwhite): load if exists
+
+                BatchSize = 16;
+                Subdivisions = 8;
+                HeightWidth = 608;
+                IsRandomChecked = true;
+                MaxObjects = 150;
+            }
+
+            if (e.PropertyName == nameof(ObjDataFile) && !string.IsNullOrWhiteSpace(ObjDataFile))
+            {
+                // TODO (judwhite): load if exists
+
+                var dataDirectory = Path.GetFileName(Path.GetDirectoryName(ObjDataFile));
+                var backupDirectory = (dataDirectory + "-backup").Replace("-data-backup", "-backup");
+
+                TrainFileName = dataDirectory + "/train.txt";
+                ValidFileName = dataDirectory + "/valid.txt";
+                ClassNamesFileName = dataDirectory + "/obj.names";
+                BackupFolder = backupDirectory + "/";
             }
         }
 
@@ -123,24 +183,11 @@ namespace YoloTrain.Views.Project
         private void SetDefaults()
         {
             ProjectDirectory = Environment.CurrentDirectory;
-
-            BatchSize = 64;
-            Subdivisions = 16;
-            HeightWidth = 416;
-            Anchors = "10,13,  16,30,  33,23,  30,61,  62,45,  59,119,  116,90,  156,198,  373,326";
-            Classes = 0;
-            IsRandomChecked = false;
-
-            TrainFileName = "data/train.txt";
-            ValidFileName = "data/valid.txt";
-            ClassNamesFileName = "data/obj.names";
-            BackupFolder = "backup/";
         }
 
         public ICommand SelectProjectDirectoryCommand { get; }
         public ICommand FindDarknetExecutableCommand { get; }
         public ICommand LoadYoloConfigCommand { get; }
-        public ICommand DetectAnchorsCommand { get; }
         public ICommand LoadObjDataCommand { get; }
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
@@ -163,40 +210,28 @@ namespace YoloTrain.Views.Project
             set => Set(nameof(ProjectDirectory), value);
         }
 
-        public int BatchSize
+        public int? BatchSize
         {
-            get => Get<int>(nameof(BatchSize));
+            get => Get<int?>(nameof(BatchSize));
             set => Set(nameof(BatchSize), value);
         }
 
-        public int Subdivisions
+        public int? Subdivisions
         {
-            get => Get<int>(nameof(Subdivisions));
+            get => Get<int?>(nameof(Subdivisions));
             set => Set(nameof(Subdivisions), value);
         }
 
-        public int HeightWidth
+        public int? HeightWidth
         {
-            get => Get<int>(nameof(HeightWidth));
+            get => Get<int?>(nameof(HeightWidth));
             set => Set(nameof(HeightWidth), value);
         }
 
-        public int Filters
+        public int? MaxObjects
         {
-            get => Get<int>(nameof(Filters));
-            set => Set(nameof(Filters), value);
-        }
-
-        public string Anchors
-        {
-            get => Get<string>(nameof(Anchors));
-            set => Set(nameof(Anchors), value);
-        }
-
-        public int Classes
-        {
-            get => Get<int>(nameof(Classes));
-            set => Set(nameof(Classes), value);
+            get => Get<int?>(nameof(MaxObjects));
+            set => Set(nameof(MaxObjects), value);
         }
 
         public bool IsRandomChecked
@@ -239,12 +274,6 @@ namespace YoloTrain.Views.Project
         {
             get => Get<string>(nameof(YoloConfigFile));
             set => Set(nameof(YoloConfigFile), value);
-        }
-
-        public bool IsDetectEnabled
-        {
-            get => Get<bool>(nameof(IsDetectEnabled));
-            private set => Set(nameof(IsDetectEnabled), value);
         }
 
         public string ObjDataFile

@@ -8,7 +8,7 @@ namespace YoloTrain.Config
         public int Version { get; set; }
 
         [JsonProperty("yolo_version")]
-        public int YoloVersion { get; set; }
+        public string YoloVersion { get; set; }
 
         [JsonProperty("darknet_path")]
         public string DarknetExecutableFilePath { get; set; }

@@ -9,7 +9,7 @@
     mc:Ignorable="d"
     Title="New Project" 
     Height="640" 
-    Width="800"
+    Width="640"
     WindowStartupLocation="CenterOwner"
     FocusManager.FocusedElement="{Binding ElementName=ProjectFileNameTextBox}"
     ResizeMode="CanMinimize"
@@ -26,6 +26,8 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -39,7 +41,7 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="180" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
@@ -59,8 +61,10 @@
                 </StackPanel>
             </Grid>
 
+            <Separator Grid.Row="1" Margin="0,8" />
+
             <!-- YOLO Config -->
-            <Grid Grid.Row="1">
+            <Grid Grid.Row="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
@@ -73,21 +77,40 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="180" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
                 <Label Grid.Row="0" Content="YOLOv3 Config" />
                 <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
                     <TextBox Height="20" Width="300" Text="{Binding YoloConfigFile}"/>
-                    <Button Margin="8,0,0,0" Content="Browse..." Height="20" Width="80" Command="{Binding LoadYoloConfigCommand}" />
+                    <Button Margin="8,0,0,0" Content="Browse..." Height="20" Width="80" Command="{Binding LoadYoloConfigCommand}" Visibility="Hidden" />
                 </StackPanel>
 
                 <Label Margin="16,0,0,0" Grid.Row="1" Grid.Column="0" Content="Batch Size" />
-                <TextBox Grid.Row="1" Grid.Column="1" Width="80" Height="20" HorizontalAlignment="Left" Text="{Binding BatchSize, Converter={StaticResource NullableIntConverter}}" />
+                <ComboBox Grid.Row="1" Grid.Column="1" Width="80" Height="20" HorizontalAlignment="Left" Text="{Binding BatchSize, Converter={StaticResource NullableIntConverter}, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" IsEditable="True">
+                    <ComboBox.Items>
+                        <ComboBoxItem Content="64" />
+                        <ComboBoxItem Content="32" />
+                        <ComboBoxItem Content="16" />
+                        <ComboBoxItem Content="8" />
+                        <ComboBoxItem Content="4" />
+                        <ComboBoxItem Content="2" />
+                        <ComboBoxItem Content="1" />
+                    </ComboBox.Items>
+                </ComboBox>
 
                 <Label Margin="16,0,0,0" Grid.Row="2" Grid.Column="0" Content="Subdivisions" />
-                <TextBox Grid.Row="2" Grid.Column="1" Width="80" Height="20" HorizontalAlignment="Left" Text="{Binding Subdivisions, Converter={StaticResource NullableIntConverter}}"/>
+                <ComboBox Grid.Row="2" Grid.Column="1" Width="80" Height="20" HorizontalAlignment="Left" Text="{Binding Subdivisions, Converter={StaticResource NullableIntConverter}, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" IsEditable="True">
+                    <ComboBox.Items>
+                        <ComboBoxItem Content="32" />
+                        <ComboBoxItem Content="16" />
+                        <ComboBoxItem Content="8" />
+                        <ComboBoxItem Content="4" />
+                        <ComboBoxItem Content="2" />
+                        <ComboBoxItem Content="1" />
+                    </ComboBox.Items>
+                </ComboBox>
 
                 <Label Margin="16,0,0,0" Grid.Row="3" Grid.Column="0" Content="Height/Width" />
                 <ComboBox Grid.Row="3" Grid.Column="1" Width="80" Height="20" HorizontalAlignment="Left" Text="{Binding HeightWidth, Converter={StaticResource NullableIntConverter}, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" IsEditable="True">
@@ -101,25 +124,18 @@
                     </ComboBox.Items>
                 </ComboBox>
 
-                <Label Margin="16,0,0,0" Grid.Row="4" Grid.Column="0" Content="Filters" />
-                <TextBox Grid.Row="4" Grid.Column="1" Width="80" Height="20" HorizontalAlignment="Left" Text="{Binding Filters}" IsReadOnly="True" Background="#CCC"/>
-
-                <Label Margin="16,0,0,0" Grid.Row="5" Grid.Column="0" Content="Anchors" />
-                <StackPanel Grid.Row="5" Grid.Column="1"  Orientation="Horizontal">
-                    <TextBox Width="300" Height="20" HorizontalAlignment="Left" Text="{Binding Anchors}"/>
-                    <Button Margin="8,0,0,0" Content="Update..." Height="20" Width="80" Command="{Binding DetectAnchorsCommand}" />
-                </StackPanel>
-
-                <Label Margin="16,0,0,0" Grid.Row="6" Grid.Column="0" Content="Classes" />
-                <TextBox Grid.Row="6" Grid.Column="1" Width="80" Height="20" HorizontalAlignment="Left" Text="{Binding Classes, Converter={StaticResource NullableIntConverter}}"/>
-
                 <Label Margin="16,0,0,0" Grid.Row="7" Grid.Column="0" Content="Random" />
                 <CheckBox Grid.Row="7" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left" IsChecked="{Binding IsRandomChecked}"/>
 
+                <Label Margin="16,0,0,0" Grid.Row="8" Grid.Column="0" Content="Max Objects per Image" />
+                <TextBox Grid.Row="8" Grid.Column="1" Width="80" Height="20" HorizontalAlignment="Left" Text="{Binding MaxObjects, Converter={StaticResource NullableIntConverter}}"/>
+
             </Grid>
 
+            <Separator Grid.Row="3" Margin="0,8" />
+
             <!-- obj.data -->
-            <Grid Grid.Row="2">
+            <Grid Grid.Row="4">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
@@ -128,14 +144,14 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="180" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
                 <Label Grid.Row="0" Content="obj.data Location" />
                 <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
                     <TextBox Height="20" Width="300" Text="{Binding ObjDataFile}"/>
-                    <Button Margin="8,0,0,0" Content="Browse..." Height="20" Width="80" Command="{Binding LoadObjDataCommand}" />
+                    <Button Margin="8,0,0,0" Content="Browse..." Height="20" Width="80" Command="{Binding LoadObjDataCommand}" Visibility="Hidden" />
                 </StackPanel>
 
                 <Label Margin="16,0,0,0" Grid.Row="1" Grid.Column="0" Content="Train" />
@@ -151,8 +167,6 @@
                 <TextBox Grid.Row="4" Grid.Column="1" Width="300" Height="20" HorizontalAlignment="Left" Text="{Binding BackupFolder}" />
             </Grid>
         </Grid>
-
-        <Separator Grid.Row="1" Margin="0,8" />
 
         <Grid Grid.Row="2" HorizontalAlignment="Right" Margin="0,8,0,0">
             <Grid.RowDefinitions>
