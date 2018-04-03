@@ -13,11 +13,11 @@ namespace YoloTrain.Config
         [JsonProperty("darknet_path")]
         public string DarknetExecutableFilePath { get; set; }
 
-        [JsonProperty("train_yolo_cfg_path")]
-        public string TrainYoloConfigFilePath { get; set; }
+        [JsonProperty("yolo_config_path")]
+        public string YoloConfigFilePath { get; set; }
 
-        [JsonProperty("test_yolo_cfg_path")]
-        public string TestYoloConfigFilePath { get; set; }
+        [JsonProperty("images_directory")]
+        public string ImagesDirectory { get; set; }
 
         [JsonProperty("obj_data_path")]
         public string ObjectDataFilePath { get; set; }

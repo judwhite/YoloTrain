@@ -39,6 +39,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="180" />
@@ -51,13 +52,19 @@
                 <Label Grid.Row="1" Content="Project Directory" />
                 <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
                     <TextBox Height="20" Width="300" Text="{Binding ProjectDirectory}" />
-                    <Button Margin="8,0,0,0" Content="Browse..." Height="20" Width="80" Command="{Binding SelectProjectDirectoryCommand}" />
+                    <Button Margin="8,0,0,0" Content="_Browse..." Height="20" Width="80" Command="{Binding SelectProjectDirectoryCommand}" />
                 </StackPanel>
 
                 <Label Grid.Row="2" Grid.Column="0" Content="darknet.exe Location" />
                 <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
                     <TextBox Height="20" Width="300" Text="{Binding DarknetExecutable}"/>
-                    <Button Margin="8,0,0,0" Content="Browse..." Height="20" Width="80" Command="{Binding FindDarknetExecutableCommand}" />
+                    <Button Margin="8,0,0,0" Content="B_rowse..." Height="20" Width="80" Command="{Binding FindDarknetExecutableCommand}" />
+                </StackPanel>
+
+                <Label Grid.Row="3" Grid.Column="0" Content="Images Location" />
+                <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
+                    <TextBox Height="20" Width="300" Text="{Binding ImagesDirectory}"/>
+                    <Button Margin="8,0,0,0" Content="Br_owse..." Height="20" Width="80" Command="{Binding BrowseImagesDirectoryCommand}" />
                 </StackPanel>
             </Grid>
 

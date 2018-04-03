@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Windows.Input;
+using Newtonsoft.Json;
 using YoloTrain.Config;
 using YoloTrain.Mvvm;
 
@@ -25,6 +26,7 @@ namespace YoloTrain.Views.Project
         string ProjectDirectory { get; set; }
 
         string DarknetExecutable { get; set; }
+        string ImagesDirectory { get; set; }
 
         string YoloConfigFile { get; set; }
         int? BatchSize { get; set; }
@@ -45,7 +47,10 @@ namespace YoloTrain.Views.Project
         public NewProjectViewModel()
         {
             PropertyChanged += NewProjectViewModel_PropertyChanged;
+
+            SaveCommand = new DelegateCommand(Save);
             CancelCommand = new DelegateCommand(() => CloseWindow(false));
+
             SelectProjectDirectoryCommand = new DelegateCommand(() =>
             {
                 var result = ShowSelectFolderDialog(out string selectedDirectory);
@@ -57,6 +62,7 @@ namespace YoloTrain.Views.Project
                     }
                 }
             });
+
             FindDarknetExecutableCommand = new DelegateCommand(() =>
             {
                 const string filter = "darknet.exe|darknet.exe|Executables (*.exe)|*.exe|All files (*.*)|*.*";
@@ -71,34 +77,74 @@ namespace YoloTrain.Views.Project
             });
 
             SetDefaults();
-
-            SaveCommand = new DelegateCommand(Save);
         }
 
         private void Save()
         {
             // TODO (judwhite): finish
-
-            var project = new YoloProject
+            // TODO (judwhite): add validation
+            MouseHelper.SetWaitCursor();
+            try
             {
-                Version = 1,
-                YoloVersion = "3",
-                DarknetExecutableFilePath = DarknetExecutable,
-                TrainYoloConfigFilePath = YoloConfigFile,
-                ObjectDataFilePath = ObjDataFile
-            };
+                const int classes = 0;
+                const int filters = (classes + 5) * 3;
 
-            var yoloConfig = new YoloTrainSettings
+                string yoloTemplate = File.ReadAllText(Path.Combine("darknet", "yolov3.cfg.template"));
+                string yoloCfg = yoloTemplate
+                    .Replace("%batch%", BatchSize.ToString())
+                    .Replace("%subdivisions%", Subdivisions.ToString())
+                    .Replace("%width%", HeightWidth.ToString())
+                    .Replace("%height%", HeightWidth.ToString())
+                    .Replace("%filters%", filters.ToString())
+                    .Replace("%classes%", classes.ToString())
+                    .Replace("%anchors%", "10,13,  16,30,  33,23,  30,61,  62,45,  59,119,  116,90,  156,198,  373,326")
+                    .Replace("%random%", IsRandomChecked ? "1" : "0")
+                    .Replace("%max%", MaxObjects.ToString());
+
+                Directory.CreateDirectory(Path.GetDirectoryName(YoloConfigFile));
+                File.WriteAllText(YoloConfigFile, yoloCfg);
+
+                string objDataTemplate = File.ReadAllText(Path.Combine("darknet", "obj.data.template"));
+                string objData = objDataTemplate
+                    .Replace("%classes%", classes.ToString())
+                    .Replace("%train%", TrainFileName)
+                    .Replace("%valid%", ValidFileName)
+                    .Replace("%names%", ClassNamesFileName)
+                    .Replace("%backup%", BackupFolder);
+
+                Directory.CreateDirectory(Path.GetDirectoryName(ObjDataFile));
+                File.WriteAllText(ObjDataFile, objData);
+
+                var project = new YoloProject
+                {
+                    Version = 1,
+                    YoloVersion = "3",
+                    DarknetExecutableFilePath = DarknetExecutable,
+                    YoloConfigFilePath = YoloConfigFile,
+                    ObjectDataFilePath = ObjDataFile,
+                    ImagesDirectory = ImagesDirectory
+                };
+
+                string projectFullPath = Path.Combine(ProjectDirectory, ProjectFileName);
+                string projectJson = JsonConvert.SerializeObject(project);
+                File.WriteAllText(projectFullPath, projectJson);
+
+                var yoloConfig = new YoloTrainSettings
+                {
+                    Version = 1,
+                    // TODO (judwhite): maintain history
+                    RecentProjects = new List<string> { projectFullPath }
+                };
+
+                var yoloConfigJson = JsonConvert.SerializeObject(yoloConfig);
+                File.WriteAllText("yolotrain.cfg", yoloConfigJson);
+
+                CloseWindow(true);
+            }
+            finally
             {
-                Version = 1,
-                RecentProjects = new List<string> { Path.Combine(ProjectDirectory, ProjectFileName) }
-            };
-
-            /*var anchors = "10,13,  16,30,  33,23,  30,61,  62,45,  59,119,  116,90,  156,198,  373,326";
-            var classes = 0;
-            var filters = (classes + 5) * 3;*/
-
-            CloseWindow(true);
+                MouseHelper.ResetCursor();
+            }
         }
 
         private void NewProjectViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -162,6 +208,11 @@ namespace YoloTrain.Views.Project
                 ValidFileName = dataDirectory + "/valid.txt";
                 ClassNamesFileName = dataDirectory + "/obj.names";
                 BackupFolder = backupDirectory + "/";
+
+                if (string.IsNullOrWhiteSpace(ImagesDirectory))
+                {
+                    ImagesDirectory = dataDirectory + "/img";
+                }
             }
         }
 
@@ -268,6 +319,12 @@ namespace YoloTrain.Views.Project
         {
             get => Get<string>(nameof(DarknetExecutable));
             set => Set(nameof(DarknetExecutable), value);
+        }
+
+        public string ImagesDirectory
+        {
+            get => Get<string>(nameof(ImagesDirectory));
+            set => Set(nameof(ImagesDirectory), value);
         }
 
         public string YoloConfigFile
