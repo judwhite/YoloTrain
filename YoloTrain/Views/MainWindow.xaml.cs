@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Drawing;
-using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using YoloTrain.Mvvm;
-using YoloTrain.Mvvm.ApplicationServices;
 using Point = System.Windows.Point;
 
 namespace YoloTrain.Views
@@ -61,7 +59,7 @@ namespace YoloTrain.Views
                 e.Handled = true;
 
                 var imgOffset = GetAbsolutePlacement(imgTrain);
-                var img = _viewModel.CurrentImage;
+                var img = _viewModel.CurrentBitmap;
 
                 var realx = x - imgOffset.X;
                 var realy = y - imgOffset.Y;
@@ -73,8 +71,7 @@ namespace YoloTrain.Views
                 var rect = new Rectangle((int)imgx, (int)imgy, (int)(width * scalex), (int)(height * scaley));
                 if (rect.Width == 0 || rect.Height == 0)
                     return;
-                var bmp = new Bitmap(img);
-                var newImg = bmp.Clone(rect, bmp.PixelFormat);
+                var newImg = img.Clone(rect, img.PixelFormat);
                 newImg.Save(@"f:\crop.bmp");
             }
         }
@@ -121,7 +118,7 @@ namespace YoloTrain.Views
 
                 dragSelectionCanvas.Visibility = Visibility.Visible;
 
-                var img = _viewModel.CurrentImage;
+                var img = _viewModel.CurrentBitmap;
 
                 var realx = x - imgOffset.X;
                 var realy = y - imgOffset.Y;
