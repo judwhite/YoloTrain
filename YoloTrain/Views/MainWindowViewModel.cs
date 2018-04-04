@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -16,6 +17,7 @@ namespace YoloTrain.Views
         ICommand ExitCommand { get; }
         string CurrentImage { get; set; }
         Bitmap CurrentBitmap { get; set; }
+        ObservableCollection<string> Classes { get; set; }
     }
 
     public class MainWindowViewModel : ViewModel, IMainWindowViewModel
@@ -67,6 +69,26 @@ namespace YoloTrain.Views
             _yoloProject = JsonConvert.DeserializeObject<YoloProject>(projectJson);
 
             string basePath = Path.GetDirectoryName(_yoloProject.DarknetExecutableFilePath);
+
+            string objDataFileName = Path.Combine(basePath, _yoloProject.ObjectDataFilePath);
+            var objDataLines = File.ReadAllLines(objDataFileName);
+            foreach (var objDataLine in objDataLines)
+            {
+                var parts = objDataLine.Split('=');
+                if (parts.Length != 2)
+                    continue;
+
+                if (parts[0].Trim() == "names")
+                {
+                    var namesFileName = Path.Combine(basePath, parts[1].Trim());
+                    if (File.Exists(namesFileName))
+                    {
+                        var classes = File.ReadAllLines(namesFileName).Where(p => !string.IsNullOrWhiteSpace(p)).ToList();
+                        Classes = new ObservableCollection<string>(classes);
+                    }
+                }
+            }
+
             string imagesDirectory = Path.Combine(basePath, _yoloProject.ImagesDirectory.Replace("/", @"\"));
             if (!Directory.Exists(imagesDirectory))
             {
@@ -98,6 +120,12 @@ namespace YoloTrain.Views
         {
             get => Get<string>(nameof(CurrentImage));
             set => Set(nameof(CurrentImage), value);
+        }
+
+        public ObservableCollection<string> Classes
+        {
+            get => Get<ObservableCollection<string>>(nameof(Classes));
+            set => Set(nameof(Classes), value);
         }
 
         public Bitmap CurrentBitmap

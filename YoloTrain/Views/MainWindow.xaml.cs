@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using YoloTrain.Mvvm;
 using Point = System.Windows.Point;
@@ -18,7 +20,6 @@ namespace YoloTrain.Views
 
         private Point _origMouseDownPoint;
         private bool _isLeftMouseButtonDown;
-        private double x, y, width, height;
 
         public MainWindow(IMainWindowViewModel viewModel)
             : base(viewModel)
@@ -61,18 +62,19 @@ namespace YoloTrain.Views
                 var imgOffset = GetAbsolutePlacement(imgTrain);
                 var img = _viewModel.CurrentBitmap;
 
-                var realx = x - imgOffset.X;
-                var realy = y - imgOffset.Y;
+                Point curMouseDownPoint = e.GetPosition(imgTrain);
+                var box = GetMouseBoxRectangle(curMouseDownPoint, imgOffset);
+
+                var realx = box.X - imgOffset.X;
+                var realy = box.Y - imgOffset.Y;
                 var scaley = img.Height / imgTrain.ActualHeight;
                 var scalex = img.Width / imgTrain.ActualWidth;
                 var imgy = realy * scaley;
                 var imgx = realx * scalex;
 
-                var rect = new Rectangle((int)imgx, (int)imgy, (int)(width * scalex), (int)(height * scaley));
+                var rect = new Rectangle((int)imgx, (int)imgy, (int)(box.Width * scalex), (int)(box.Height * scaley));
                 if (rect.Width == 0 || rect.Height == 0)
                     return;
-                var newImg = img.Clone(rect, img.PixelFormat);
-                newImg.Save(@"f:\crop.bmp");
             }
         }
 
@@ -81,78 +83,39 @@ namespace YoloTrain.Views
             if (_isLeftMouseButtonDown)
             {
                 Point curMouseDownPoint = e.GetPosition(imgTrain);
+                Point imgOffset = GetAbsolutePlacement(imgTrain);
 
-                var imgOffset = GetAbsolutePlacement(imgTrain);
+                var box = GetMouseBoxRectangle(curMouseDownPoint, imgOffset);
 
-                var tmpx = Math.Min(_origMouseDownPoint.X, curMouseDownPoint.X) + imgOffset.X;
-                var tmpy = Math.Min(_origMouseDownPoint.Y, curMouseDownPoint.Y) + imgOffset.Y;
-                double overx = 0, overy = 0;
-                if (tmpx < imgOffset.X)
-                {
-                    overx = imgOffset.X - tmpx;
-                    tmpx = imgOffset.X;
-                }
-                if (tmpy < imgOffset.Y)
-                {
-                    overy = imgOffset.Y - tmpy;
-                    tmpy = imgOffset.Y;
-                }
-
-                var tmpwidth = Math.Abs(_origMouseDownPoint.X - curMouseDownPoint.X) - overx;
-                var tmpheight = Math.Abs(_origMouseDownPoint.Y - curMouseDownPoint.Y) - overy;
-
-                if (tmpx + tmpwidth - imgOffset.X > imgTrain.ActualWidth)
-                    tmpwidth = imgTrain.ActualWidth - tmpx + imgOffset.X;
-                if (tmpy + tmpheight - imgOffset.Y > imgTrain.ActualHeight)
-                    tmpheight = imgTrain.ActualHeight - tmpy + imgOffset.Y;
-
-                x = tmpx;
-                y = tmpy;
-                width = tmpwidth;
-                height = tmpheight;
-
-                Canvas.SetLeft(dragSelectionBorder, x);
-                Canvas.SetTop(dragSelectionBorder, y);
-                dragSelectionBorder.Width = width;
-                dragSelectionBorder.Height = height;
+                Canvas.SetLeft(dragSelectionBorder, box.X);
+                Canvas.SetTop(dragSelectionBorder, box.Y);
+                dragSelectionBorder.Width = box.Width;
+                dragSelectionBorder.Height = box.Height;
 
                 dragSelectionCanvas.Visibility = Visibility.Visible;
 
-                var img = _viewModel.CurrentBitmap;
-
-                var realx = x - imgOffset.X;
-                var realy = y - imgOffset.Y;
-                var scaley = img.Height / imgTrain.ActualHeight;
-                var scalex = img.Width / imgTrain.ActualWidth;
-
-                int imgy = (int)(realy * scaley);
-                int imgx = (int)(realx * scalex);
-                int rwidth = (int)(width * scalex);
-                int rheight = (int)(height * scaley);
-
                 e.Handled = true;
 
-                if (rwidth == 0 || rheight == 0)
+                var img = _viewModel.CurrentBitmap;
+
+                var yoloCoords = ImageCoordsToYoloCoords(img, imgTrain, imgOffset, box);
+
+                if (yoloCoords.Height <= double.Epsilon || yoloCoords.Width <= double.Epsilon)
                 {
                     txtCoords.Text = "";
                     return;
                 }
 
-                double dataX, dataY, dataHeight, dataWidth;
-                dataX = (rwidth / 2.0 + imgx) / (double)img.Width;
-                dataY = (rheight / 2.0 + imgy) / (double)img.Height;
-                dataHeight = (double)rheight / img.Height;
-                dataWidth = (double)rwidth / img.Width;
+                txtCoords.Text = string.Format("x: {0:0.000000} y: {1:0.000000} w: {2:0.000000} h: {3:0.000000}",
+                    yoloCoords.X, yoloCoords.Y, yoloCoords.Width, yoloCoords.Height);
 
-                rwidth = (int)(dataWidth * img.Width);
-                rheight = (int)(dataHeight * img.Height);
-                imgx = (int)(dataX * img.Width - rwidth / 2.0);
-                imgy = (int)(dataY * img.Height - rheight / 2.0);
-
-                txtCoords.Text = string.Format("x: {0:0.000000} y: {1:0.000000} w: {2:0.000000} h: {3:0.000000}", dataX, dataY, dataWidth, dataHeight);
+                // close to 'box' but renders how translating back from yolo coords will look
+                var rwidth = (int)(yoloCoords.Width * img.Width);
+                var rheight = (int)(yoloCoords.Height * img.Height);
+                var imgx = (int)(yoloCoords.X * img.Width - rwidth / 2.0);
+                var imgy = (int)(yoloCoords.Y * img.Height - rheight / 2.0);
 
                 var rect = new Rectangle(imgx, imgy, rwidth, rheight);
-                //var bmp = new System.Drawing.Bitmap(_img);
                 var newImg = img.Clone(rect, img.PixelFormat);
 
                 var bmpsource = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
@@ -164,6 +127,59 @@ namespace YoloTrain.Views
             }
         }
 
+        private Box GetMouseBoxRectangle(Point curMouseDownPoint, Point imgOffset)
+        {
+            var tmpx = Math.Min(_origMouseDownPoint.X, curMouseDownPoint.X) + imgOffset.X;
+            var tmpy = Math.Min(_origMouseDownPoint.Y, curMouseDownPoint.Y) + imgOffset.Y;
+            double overx = 0, overy = 0;
+            if (tmpx < imgOffset.X)
+            {
+                overx = imgOffset.X - tmpx;
+                tmpx = imgOffset.X;
+            }
+            if (tmpy < imgOffset.Y)
+            {
+                overy = imgOffset.Y - tmpy;
+                tmpy = imgOffset.Y;
+            }
+
+            var tmpwidth = Math.Abs(_origMouseDownPoint.X - curMouseDownPoint.X) - overx;
+            var tmpheight = Math.Abs(_origMouseDownPoint.Y - curMouseDownPoint.Y) - overy;
+
+            if (tmpx + tmpwidth - imgOffset.X > imgTrain.ActualWidth)
+                tmpwidth = imgTrain.ActualWidth - tmpx + imgOffset.X;
+            if (tmpy + tmpheight - imgOffset.Y > imgTrain.ActualHeight)
+                tmpheight = imgTrain.ActualHeight - tmpy + imgOffset.Y;
+
+            return new Box { X = tmpx, Y = tmpy, Width = tmpwidth, Height = tmpheight };
+        }
+
+        private static YoloCoords ImageCoordsToYoloCoords(Bitmap img, System.Windows.Controls.Image imageViewport, Point imageViewportOffset, Box box)
+        {
+            var realx = box.X - imageViewportOffset.X;
+            var realy = box.Y - imageViewportOffset.Y;
+            var scaley = img.Height / imageViewport.ActualHeight;
+            var scalex = img.Width / imageViewport.ActualWidth;
+
+            int imgy = (int)(realy * scaley);
+            int imgx = (int)(realx * scalex);
+            int rwidth = (int)(box.Width * scalex);
+            int rheight = (int)(box.Height * scaley);
+
+            if (rwidth == 0 || rheight == 0)
+            {
+                return new YoloCoords();
+            }
+
+            return new YoloCoords
+            {
+                X = (rwidth / 2.0 + imgx) / img.Width,
+                Y = (rheight / 2.0 + imgy) / img.Height,
+                Width = (double)rwidth / img.Width,
+                Height = (double)rheight / img.Height
+            };
+        }
+
         public static Point GetAbsolutePlacement(FrameworkElement element)
         {
             var absolutePos = element.PointToScreen(new Point(0, 0));
@@ -171,5 +187,94 @@ namespace YoloTrain.Views
             var relativePos = new Point(absolutePos.X - posMW.X, absolutePos.Y - posMW.Y);
             return relativePos;
         }
+
+        private void ImgTrain_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            string imageDirectory = Path.GetDirectoryName(_viewModel.CurrentImage);
+            string imageBoundsFileName = Path.Combine(imageDirectory, Path.GetFileNameWithoutExtension(_viewModel.CurrentImage) + ".txt");
+            if (File.Exists(imageBoundsFileName))
+            {
+                var lines = File.ReadAllLines(imageBoundsFileName);
+                foreach (var line in lines)
+                {
+                    var parts = line.Split(' ');
+                    if (parts.Length != 5)
+                        continue;
+
+                    var classNumber = int.Parse(parts[0]);
+                    var x = double.Parse(parts[1]);
+                    var y = double.Parse(parts[2]);
+                    var width = double.Parse(parts[3]);
+                    var height = double.Parse(parts[4]);
+
+                    Point imgOffset = GetAbsolutePlacement(imgTrain);
+
+                    width *= imgTrain.ActualWidth;
+                    height *= imgTrain.ActualHeight;
+
+                    x = x * imgTrain.ActualWidth - width / 2.0;
+                    y = y * imgTrain.ActualHeight - height / 2.0;
+
+                    var left = imgOffset.X + x;
+                    var top = imgOffset.Y + y;
+
+                    Canvas canvas = new Canvas();
+                    canvas.Background = new SolidColorBrush(Colors.LightBlue);
+                    canvas.Opacity = 0.5;
+                    canvas.Visibility = Visibility.Visible;
+                    canvas.HorizontalAlignment = HorizontalAlignment.Left;
+                    canvas.VerticalAlignment = VerticalAlignment.Top;
+
+                    var border = new Border();
+                    border.BorderBrush = new SolidColorBrush(Colors.Blue);
+                    border.BorderThickness = new Thickness(1);
+                    border.CornerRadius = new CornerRadius(1);
+                    border.Height = height;
+                    border.Width = width;
+                    canvas.Children.Add(border);
+
+                    var textBlock = new TextBlock();
+                    textBlock.Text = _viewModel.Classes[classNumber].Replace('_', ' ');
+                    textBlock.Background = new SolidColorBrush(Colors.Transparent);
+                    textBlock.Foreground = new SolidColorBrush(Colors.Black);
+                    textBlock.SetValue(TextBlock.FontStretchProperty, FontStretches.Condensed);
+                    textBlock.SetValue(TextBlock.FontWeightProperty, FontWeights.Bold);
+                    textBlock.LineStackingStrategy = LineStackingStrategy.BlockLineHeight;
+                    textBlock.FontSize = 11;
+                    textBlock.LineHeight = 10;
+                    textBlock.HorizontalAlignment = HorizontalAlignment.Left;
+                    textBlock.VerticalAlignment = VerticalAlignment.Top;
+                    textBlock.Padding = new Thickness(2);
+                    textBlock.TextWrapping = TextWrapping.Wrap;
+                    textBlock.Width = width;
+                    textBlock.Height = height;
+                    canvas.Children.Add(textBlock);
+
+                    canvas.Height = height;
+                    canvas.Width = width;
+
+                    MainCanvas.Children.Add(canvas);
+
+                    Canvas.SetLeft(canvas, left);
+                    Canvas.SetTop(canvas, top);
+                }
+            }
+        }
+    }
+
+    public struct Box
+    {
+        public double X { get; set; }
+        public double Y { get; set; }
+        public double Width { get; set; }
+        public double Height { get; set; }
+    }
+
+    public struct YoloCoords
+    {
+        public double X { get; set; }
+        public double Y { get; set; }
+        public double Width { get; set; }
+        public double Height { get; set; }
     }
 }
