@@ -4,5 +4,6 @@
     xmlns:converters="clr-namespace:YoloTrain.Converters">
 
     <converters:NullableIntConverter x:Key="NullableIntConverter" />
+    <converters:ImageThumbnailConverter x:Key="ImageThumbnailConverter" />
 
 </ResourceDictionary>

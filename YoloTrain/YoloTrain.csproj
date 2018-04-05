@@ -82,6 +82,7 @@
     <Compile Include="Config\ObjectNamesConfig.cs" />
     <Compile Include="Config\YoloProject.cs" />
     <Compile Include="Config\YoloTrainSettings.cs" />
+    <Compile Include="Converters\ImageThumbnailConverter.cs" />
     <Compile Include="Converters\NullableIntConverter.cs" />
     <Compile Include="Mvvm\CommandManagerHelper.cs" />
     <Compile Include="Mvvm\DelegateCommand.cs" />
@@ -206,6 +207,8 @@
       <Link>darknet\yolov3.cfg.template</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Resource Include="images\left.png" />
+    <Resource Include="images\right.png" />
     <None Include="packages.config" />
     <None Include="Themes\Default\DataGrid.Row">
       <Generator>MSBuild:Compile</Generator>

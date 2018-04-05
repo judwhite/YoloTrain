@@ -26,6 +26,112 @@
 
         <views:MainMenu x:Name="MainMenu" Grid.Row="0" Grid.ColumnSpan="2" />
 
+        <Grid Grid.Row="1" Grid.ColumnSpan="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" Background="Transparent" BorderThickness="0" Padding="14">
+                <Image Source="pack://application:,,,/images/left.png" Stretch="Uniform" />
+            </Button>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Width="178" Height="100" Background="Transparent" Command="{Binding ChangeImageCommand}" CommandParameter="0">
+                    <Image 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Top" 
+                        Cursor="Hand"
+                        Source="{Binding Mode=OneWay, Converter={StaticResource ImageThumbnailConverter}, ConverterParameter=0}"
+                    />
+                </Button>
+
+                <Button Width="178" Height="100" Background="Transparent" Command="{Binding ChangeImageCommand}" CommandParameter="1">
+                    <Image 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Top" 
+                        Cursor="Hand"
+                        Source="{Binding Mode=OneWay, Converter={StaticResource ImageThumbnailConverter}, ConverterParameter=1}"
+                    />
+                </Button>
+
+                <Button Width="178" Height="100" Background="Transparent" Command="{Binding ChangeImageCommand}" CommandParameter="2">
+                    <Image 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Top" 
+                        Cursor="Hand"
+                        Source="{Binding Mode=OneWay, Converter={StaticResource ImageThumbnailConverter}, ConverterParameter=2}"
+                    />
+                </Button>
+
+                <Button Width="178" Height="100" Background="Transparent" Command="{Binding ChangeImageCommand}" CommandParameter="3">
+                    <Image 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Top" 
+                        Cursor="Hand"
+                        Source="{Binding Mode=OneWay, Converter={StaticResource ImageThumbnailConverter}, ConverterParameter=3}"
+                    />
+                </Button>
+
+                <Button Width="178" Height="100" Background="Transparent" Command="{Binding ChangeImageCommand}" CommandParameter="4">
+                    <Image 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Top" 
+                        Cursor="Hand"
+                        Source="{Binding Mode=OneWay, Converter={StaticResource ImageThumbnailConverter}, ConverterParameter=4}"
+                    />
+                </Button>
+
+                <Button Width="178" Height="100" Background="Transparent" Command="{Binding ChangeImageCommand}" CommandParameter="5">
+                    <Image 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Top" 
+                        Cursor="Hand"
+                        Source="{Binding Mode=OneWay, Converter={StaticResource ImageThumbnailConverter}, ConverterParameter=5}"
+                    />
+                </Button>
+
+                <Button Width="178" Height="100" Background="Transparent" Command="{Binding ChangeImageCommand}" CommandParameter="6">
+                    <Image 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Top" 
+                        Cursor="Hand"
+                        Source="{Binding Mode=OneWay, Converter={StaticResource ImageThumbnailConverter}, ConverterParameter=6}"
+                    />
+                </Button>
+
+                <Button Width="178" Height="100" Background="Transparent" Command="{Binding ChangeImageCommand}" CommandParameter="7">
+                    <Image 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Top" 
+                        Cursor="Hand"
+                        Source="{Binding Mode=OneWay, Converter={StaticResource ImageThumbnailConverter}, ConverterParameter=7}"
+                    />
+                </Button>
+
+                <Button Width="178" Height="100" Background="Transparent" Command="{Binding ChangeImageCommand}" CommandParameter="8">
+                    <Image 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Top" 
+                        Cursor="Hand"
+                        Source="{Binding Mode=OneWay, Converter={StaticResource ImageThumbnailConverter}, ConverterParameter=8}"
+                    />
+                </Button>
+
+                <Button Width="178" Height="100" Background="Transparent" Command="{Binding ChangeImageCommand}" CommandParameter="9">
+                    <Image 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Top" 
+                        Cursor="Hand"
+                        Source="{Binding Mode=OneWay, Converter={StaticResource ImageThumbnailConverter}, ConverterParameter=9}"
+                    />
+                </Button>
+            </StackPanel>
+            <Button Grid.Column="2" Background="Transparent" BorderThickness="0" Padding="14">
+                <Image Source="pack://application:,,,/images/right.png" Stretch="Uniform" />
+            </Button>
+        </Grid>
+
         <Grid Grid.Row="2" Margin="10,0,0,0">
             <Image 
                 x:Name="imgTrain"  
@@ -36,7 +142,6 @@
                 MouseDown="imgTrain_MouseDown" 
                 MouseUp="imgTrain_MouseUp" 
                 MouseMove="imgTrain_MouseMove" 
-                Loaded="ImgTrain_OnLoaded"
             />
         </Grid>
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Windows;
@@ -27,7 +28,24 @@ namespace YoloTrain.Views
             InitializeComponent();
 
             _viewModel = viewModel;
+            _viewModel.PropertyChanged += _viewModel_PropertyChanged;
+
+            Loaded += MainWindow_Loaded;
+
             HandleEscape = false;
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            UpdateCurrentImage();
+        }
+
+        private void _viewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(_viewModel.CurrentImage))
+            {
+                UpdateCurrentImage();
+            }
         }
 
         protected override void OnInitialized(EventArgs e)
@@ -188,8 +206,13 @@ namespace YoloTrain.Views
             return relativePos;
         }
 
-        private void ImgTrain_OnLoaded(object sender, RoutedEventArgs e)
+        private void UpdateCurrentImage()
         {
+            if (_viewModel.CurrentImage == null)
+                return;
+
+            MainCanvas.Children.Clear();
+
             string imageDirectory = Path.GetDirectoryName(_viewModel.CurrentImage);
             string imageBoundsFileName = Path.Combine(imageDirectory, Path.GetFileNameWithoutExtension(_viewModel.CurrentImage) + ".txt");
             if (File.Exists(imageBoundsFileName))

@@ -33,6 +33,7 @@ namespace YoloTrain.Views
                     LoadProject();
             });
             ExitCommand = new DelegateCommand(() => Application.Current.MainWindow.Close());
+            ChangeImageCommand = new DelegateCommand<string>(ChangeImage);
 
             PropertyChanged += MainWindowViewModel_PropertyChanged;
 
@@ -50,10 +51,48 @@ namespace YoloTrain.Views
                 }
                 CurrentBitmap = new Bitmap(Image.FromFile(CurrentImage));
             }
+
+            if (e.PropertyName == nameof(CurrentImagePosition))
+            {
+                if (CurrentImagePosition <= 0)
+                {
+                    CurrentImage = null;
+                    return;
+                }
+
+                CurrentImage = ImagePaths[CurrentImagePosition - 1];
+            }
+        }
+
+        private void ChangeImage(string offset)
+        {
+            int n = int.Parse(offset);
+            int newPosition = CurrentImagePosition + n;
+            if (newPosition < 1 || newPosition >= ImagePaths.Count)
+                return;
+            CurrentImagePosition = newPosition;
+        }
+
+        private void NextImage()
+        {
+            if (CurrentImagePosition >= ImagePaths.Count)
+                return;
+
+            CurrentImagePosition++;
+        }
+
+        private void PreviousImage()
+        {
+            if (CurrentImagePosition <= 1)
+                return;
+
+            CurrentImagePosition--;
         }
 
         private void LoadProject()
         {
+            CurrentImagePosition = 0;
+
             const string yoloTrainConfigFileName = "yolotrain.cfg";
             if (!File.Exists(yoloTrainConfigFileName))
                 return;
@@ -97,17 +136,29 @@ namespace YoloTrain.Views
             }
 
             string[] imageFiles = Directory.GetFiles(imagesDirectory, "*.jpg", SearchOption.AllDirectories);
+            ImagePaths = new ObservableCollection<string>(imageFiles);
             if (imageFiles.Length > 0)
             {
-
-                CurrentImage = imageFiles[0];
+                CurrentImagePosition = 1;
             }
+        }
+
+        public ObservableCollection<string> ImagePaths
+        {
+            get => Get<ObservableCollection<string>>(nameof(ImagePaths));
+            set => Set(nameof(ImagePaths), value);
         }
 
         public ICommand NewProjectCommand
         {
             get => Get<ICommand>(nameof(NewProjectCommand));
             private set => Set(nameof(NewProjectCommand), value);
+        }
+
+        public ICommand ChangeImageCommand
+        {
+            get => Get<ICommand>(nameof(ChangeImageCommand));
+            private set => Set(nameof(ChangeImageCommand), value);
         }
 
         public ICommand ExitCommand
@@ -120,6 +171,12 @@ namespace YoloTrain.Views
         {
             get => Get<string>(nameof(CurrentImage));
             set => Set(nameof(CurrentImage), value);
+        }
+
+        public int CurrentImagePosition
+        {
+            get => Get<int>(nameof(CurrentImagePosition));
+            set => Set(nameof(CurrentImagePosition), value);
         }
 
         public ObservableCollection<string> Classes
