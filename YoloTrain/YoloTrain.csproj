@@ -92,6 +92,9 @@
     <Compile Include="Mvvm\Events\ShowSelectFolderDialogEventArgs.cs" />
     <Compile Include="Mvvm\KeyBindingsHelper.cs" />
     <Compile Include="Mvvm\Model.cs" />
+    <Compile Include="Views\Controls\ImagePreviewButton.xaml.cs">
+      <DependentUpon>ImagePreviewButton.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\MainMenu.xaml.cs">
       <DependentUpon>MainMenu.xaml</DependentUpon>
     </Compile>
@@ -157,6 +160,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Themes\Default\Theme.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Controls\ImagePreviewButton.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

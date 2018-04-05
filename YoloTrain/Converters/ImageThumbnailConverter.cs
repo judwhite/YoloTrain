@@ -1,28 +1,30 @@
 ﻿using System;
 using System.Globalization;
 using System.Windows.Data;
-using YoloTrain.Views;
+using System.Windows.Media.Imaging;
 
 namespace YoloTrain.Converters
 {
-    public class ImageThumbnailConverter : IValueConverter
+    public class ImageThumbnailConverter : IMultiValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null || parameter == null)
+            if (values == null || values.Length != 2)
                 return null;
 
-            int offset = int.Parse((string)parameter);
-            var viewModel = (MainWindowViewModel)value;
-
-            int index = viewModel.CurrentImagePosition + offset - 1;
-            if (viewModel.ImagePaths == null || viewModel.ImagePaths.Count <= index)
+            var viewModel = values[0] as string[];
+            if (viewModel == null)
                 return null;
 
-            return viewModel.ImagePaths[index];
+            int offset = (int)values[1];
+
+            if (offset >= viewModel.Length)
+                return null;
+
+            return new BitmapImage(new Uri(viewModel[offset]));
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {
             throw new NotSupportedException();
         }

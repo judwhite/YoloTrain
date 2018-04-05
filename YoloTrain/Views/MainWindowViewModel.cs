@@ -1,4 +1,6 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
@@ -32,8 +34,11 @@ namespace YoloTrain.Views
                 if (result == true)
                     LoadProject();
             });
+            NextImageCommand = new DelegateCommand(NextImage);
+            PreviousImageCommand = new DelegateCommand(PreviousImage);
+            ChangeImageCommand = new DelegateCommand<int>(ChangeImage);
+
             ExitCommand = new DelegateCommand(() => Application.Current.MainWindow.Close());
-            ChangeImageCommand = new DelegateCommand<string>(ChangeImage);
 
             PropertyChanged += MainWindowViewModel_PropertyChanged;
 
@@ -52,22 +57,63 @@ namespace YoloTrain.Views
                 CurrentBitmap = new Bitmap(Image.FromFile(CurrentImage));
             }
 
+            if (e.PropertyName == nameof(ImagePaths))
+            {
+                if (ImagePaths == null)
+                {
+                    ImageCount = 0;
+                    return;
+                }
+
+                ImageCount = ImagePaths.Count;
+            }
+
             if (e.PropertyName == nameof(CurrentImagePosition))
             {
                 if (CurrentImagePosition <= 0)
                 {
+                    PreviewImages = new string[0];
                     CurrentImage = null;
                     return;
                 }
 
                 CurrentImage = ImagePaths[CurrentImagePosition - 1];
+                var previewList = new List<string>();
+                int start = Math.Max(1, CurrentImagePosition - 2);
+                for (int i = start; i < start + 10 && i <= ImagePaths.Count; i++)
+                {
+                    previewList.Add(ImagePaths[i - 1]);
+                    if (i == CurrentImagePosition)
+                    {
+                        PreviewSelectedOffset = i - start;
+                    }
+                }
+                PreviewImages = previewList.ToArray();
+                PreviewStartOffset = start - 1;
             }
         }
 
-        private void ChangeImage(string offset)
+        public int PreviewSelectedOffset
         {
-            int n = int.Parse(offset);
-            int newPosition = CurrentImagePosition + n;
+            get => Get<int>(nameof(PreviewSelectedOffset));
+            set => Set(nameof(PreviewSelectedOffset), value);
+        }
+
+        public int PreviewStartOffset
+        {
+            get => Get<int>(nameof(PreviewStartOffset));
+            set => Set(nameof(PreviewStartOffset), value);
+        }
+
+        public int ImageCount
+        {
+            get => Get<int>(nameof(ImageCount));
+            set => Set(nameof(ImageCount), value);
+        }
+
+        private void ChangeImage(int n)
+        {
+            int newPosition = PreviewStartOffset + n + 1;
             if (newPosition < 1 || newPosition >= ImagePaths.Count)
                 return;
             CurrentImagePosition = newPosition;
@@ -75,7 +121,7 @@ namespace YoloTrain.Views
 
         private void NextImage()
         {
-            if (CurrentImagePosition >= ImagePaths.Count)
+            if (ImagePaths == null || CurrentImagePosition >= ImagePaths.Count)
                 return;
 
             CurrentImagePosition++;
@@ -83,10 +129,16 @@ namespace YoloTrain.Views
 
         private void PreviousImage()
         {
-            if (CurrentImagePosition <= 1)
+            if (ImagePaths == null || CurrentImagePosition <= 1)
                 return;
 
             CurrentImagePosition--;
+        }
+
+        public string[] PreviewImages
+        {
+            get => Get<string[]>(nameof(PreviewImages));
+            private set => Set(nameof(PreviewImages), value);
         }
 
         private void LoadProject()
@@ -159,6 +211,18 @@ namespace YoloTrain.Views
         {
             get => Get<ICommand>(nameof(ChangeImageCommand));
             private set => Set(nameof(ChangeImageCommand), value);
+        }
+
+        public ICommand PreviousImageCommand
+        {
+            get => Get<ICommand>(nameof(PreviousImageCommand));
+            private set => Set(nameof(PreviousImageCommand), value);
+        }
+
+        public ICommand NextImageCommand
+        {
+            get => Get<ICommand>(nameof(NextImageCommand));
+            private set => Set(nameof(NextImageCommand), value);
         }
 
         public ICommand ExitCommand

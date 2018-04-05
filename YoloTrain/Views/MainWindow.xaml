@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:YoloTrain"
         xmlns:mvvm="clr-namespace:YoloTrain.Mvvm"
         xmlns:views="clr-namespace:YoloTrain.Views"
+        xmlns:controls="clr-namespace:YoloTrain.Views.Controls"
         mc:Ignorable="d"
         WindowState="Maximized"
         Title="YOLO Train" 
@@ -16,7 +17,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="100" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -27,109 +28,51 @@
         <views:MainMenu x:Name="MainMenu" Grid.Row="0" Grid.ColumnSpan="2" />
 
         <Grid Grid.Row="1" Grid.ColumnSpan="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="100" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="0" Background="Transparent" BorderThickness="0" Padding="14">
-                <Image Source="pack://application:,,,/images/left.png" Stretch="Uniform" />
+            <Button Grid.Row="1" Grid.Column="0" Background="Transparent" BorderThickness="0" Padding="18" Command="{Binding PreviousImageCommand}">
+                <Image Source="pack://application:,,,/images/left.png" Stretch="UniformToFill" />
             </Button>
-            <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <Button Width="178" Height="100" Background="Transparent" Command="{Binding ChangeImageCommand}" CommandParameter="0">
-                    <Image 
-                        HorizontalAlignment="Center" 
-                        VerticalAlignment="Top" 
-                        Cursor="Hand"
-                        Source="{Binding Mode=OneWay, Converter={StaticResource ImageThumbnailConverter}, ConverterParameter=0}"
-                    />
-                </Button>
 
-                <Button Width="178" Height="100" Background="Transparent" Command="{Binding ChangeImageCommand}" CommandParameter="1">
-                    <Image 
-                        HorizontalAlignment="Center" 
-                        VerticalAlignment="Top" 
-                        Cursor="Hand"
-                        Source="{Binding Mode=OneWay, Converter={StaticResource ImageThumbnailConverter}, ConverterParameter=1}"
-                    />
-                </Button>
-
-                <Button Width="178" Height="100" Background="Transparent" Command="{Binding ChangeImageCommand}" CommandParameter="2">
-                    <Image 
-                        HorizontalAlignment="Center" 
-                        VerticalAlignment="Top" 
-                        Cursor="Hand"
-                        Source="{Binding Mode=OneWay, Converter={StaticResource ImageThumbnailConverter}, ConverterParameter=2}"
-                    />
-                </Button>
-
-                <Button Width="178" Height="100" Background="Transparent" Command="{Binding ChangeImageCommand}" CommandParameter="3">
-                    <Image 
-                        HorizontalAlignment="Center" 
-                        VerticalAlignment="Top" 
-                        Cursor="Hand"
-                        Source="{Binding Mode=OneWay, Converter={StaticResource ImageThumbnailConverter}, ConverterParameter=3}"
-                    />
-                </Button>
-
-                <Button Width="178" Height="100" Background="Transparent" Command="{Binding ChangeImageCommand}" CommandParameter="4">
-                    <Image 
-                        HorizontalAlignment="Center" 
-                        VerticalAlignment="Top" 
-                        Cursor="Hand"
-                        Source="{Binding Mode=OneWay, Converter={StaticResource ImageThumbnailConverter}, ConverterParameter=4}"
-                    />
-                </Button>
-
-                <Button Width="178" Height="100" Background="Transparent" Command="{Binding ChangeImageCommand}" CommandParameter="5">
-                    <Image 
-                        HorizontalAlignment="Center" 
-                        VerticalAlignment="Top" 
-                        Cursor="Hand"
-                        Source="{Binding Mode=OneWay, Converter={StaticResource ImageThumbnailConverter}, ConverterParameter=5}"
-                    />
-                </Button>
-
-                <Button Width="178" Height="100" Background="Transparent" Command="{Binding ChangeImageCommand}" CommandParameter="6">
-                    <Image 
-                        HorizontalAlignment="Center" 
-                        VerticalAlignment="Top" 
-                        Cursor="Hand"
-                        Source="{Binding Mode=OneWay, Converter={StaticResource ImageThumbnailConverter}, ConverterParameter=6}"
-                    />
-                </Button>
-
-                <Button Width="178" Height="100" Background="Transparent" Command="{Binding ChangeImageCommand}" CommandParameter="7">
-                    <Image 
-                        HorizontalAlignment="Center" 
-                        VerticalAlignment="Top" 
-                        Cursor="Hand"
-                        Source="{Binding Mode=OneWay, Converter={StaticResource ImageThumbnailConverter}, ConverterParameter=7}"
-                    />
-                </Button>
-
-                <Button Width="178" Height="100" Background="Transparent" Command="{Binding ChangeImageCommand}" CommandParameter="8">
-                    <Image 
-                        HorizontalAlignment="Center" 
-                        VerticalAlignment="Top" 
-                        Cursor="Hand"
-                        Source="{Binding Mode=OneWay, Converter={StaticResource ImageThumbnailConverter}, ConverterParameter=8}"
-                    />
-                </Button>
-
-                <Button Width="178" Height="100" Background="Transparent" Command="{Binding ChangeImageCommand}" CommandParameter="9">
-                    <Image 
-                        HorizontalAlignment="Center" 
-                        VerticalAlignment="Top" 
-                        Cursor="Hand"
-                        Source="{Binding Mode=OneWay, Converter={StaticResource ImageThumbnailConverter}, ConverterParameter=9}"
-                    />
-                </Button>
+            <!-- Start preview images -->
+            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+                <controls:ImagePreviewButton PreviewOffsetIndex="0" Width="178" Height="100" IsSelected="{Binding Path=PreviewSelectedOffset, Converter={StaticResource IsEqualToBoolConverter}, ConverterParameter=0}" />
+                <controls:ImagePreviewButton PreviewOffsetIndex="1" Width="178" Height="100" IsSelected="{Binding Path=PreviewSelectedOffset, Converter={StaticResource IsEqualToBoolConverter}, ConverterParameter=1}" />
+                <controls:ImagePreviewButton PreviewOffsetIndex="2" Width="178" Height="100" IsSelected="{Binding Path=PreviewSelectedOffset, Converter={StaticResource IsEqualToBoolConverter}, ConverterParameter=2}" />
+                <controls:ImagePreviewButton PreviewOffsetIndex="3" Width="178" Height="100" IsSelected="{Binding Path=PreviewSelectedOffset, Converter={StaticResource IsEqualToBoolConverter}, ConverterParameter=3}" />
+                <controls:ImagePreviewButton PreviewOffsetIndex="4" Width="178" Height="100" IsSelected="{Binding Path=PreviewSelectedOffset, Converter={StaticResource IsEqualToBoolConverter}, ConverterParameter=4}" />
+                <controls:ImagePreviewButton PreviewOffsetIndex="5" Width="178" Height="100" IsSelected="{Binding Path=PreviewSelectedOffset, Converter={StaticResource IsEqualToBoolConverter}, ConverterParameter=5}" />
+                <controls:ImagePreviewButton PreviewOffsetIndex="6" Width="178" Height="100" IsSelected="{Binding Path=PreviewSelectedOffset, Converter={StaticResource IsEqualToBoolConverter}, ConverterParameter=6}" />
+                <controls:ImagePreviewButton PreviewOffsetIndex="7" Width="178" Height="100" IsSelected="{Binding Path=PreviewSelectedOffset, Converter={StaticResource IsEqualToBoolConverter}, ConverterParameter=7}" />
+                <controls:ImagePreviewButton PreviewOffsetIndex="8" Width="178" Height="100" IsSelected="{Binding Path=PreviewSelectedOffset, Converter={StaticResource IsEqualToBoolConverter}, ConverterParameter=8}" />
+                <controls:ImagePreviewButton PreviewOffsetIndex="9" Width="178" Height="100" IsSelected="{Binding Path=PreviewSelectedOffset, Converter={StaticResource IsEqualToBoolConverter}, ConverterParameter=9}" />
             </StackPanel>
-            <Button Grid.Column="2" Background="Transparent" BorderThickness="0" Padding="14">
-                <Image Source="pack://application:,,,/images/right.png" Stretch="Uniform" />
+            <!-- End preview images -->
+
+            <Button Grid.Row="1" Grid.Column="2" Background="Transparent" BorderThickness="0" Padding="18" Command="{Binding NextImageCommand}">
+                <Image Source="pack://application:,,,/images/right.png" Stretch="UniformToFill" />
             </Button>
+
+            <!-- Position slider -->
+            <Slider x:Name="PositionSlider" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="16,8" Value="{Binding CurrentImagePosition, Mode=TwoWay}" Minimum="1" Maximum="{Binding Path=ImageCount}">
+                <Slider.ToolTip>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Path=CurrentImagePosition}" Margin="0" Padding="0" />
+                        <TextBlock Text="/" Margin="0" Padding="0"  />
+                        <TextBlock Text="{Binding Path=ImageCount}" Margin="0" Padding="0" />
+                    </StackPanel>
+                </Slider.ToolTip>
+            </Slider>
+
         </Grid>
 
         <Grid Grid.Row="2" Margin="10,0,0,0">

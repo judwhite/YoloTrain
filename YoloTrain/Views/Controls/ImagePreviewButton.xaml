@@ -1,0 +1,47 @@
+﻿<mvvm:UserControlView 
+    x:Class="YoloTrain.Views.Controls.ImagePreviewButton"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:local="clr-namespace:YoloTrain.Views.Controls"
+    xmlns:mvvm="clr-namespace:YoloTrain.Mvvm"
+    mc:Ignorable="d" 
+    d:DesignHeight="100" 
+    d:DesignWidth="178"
+>
+    <Button VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="Transparent" Command="{Binding ChangeImageCommand}" 
+            CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type mvvm:UserControlView}}, Path=PreviewOffsetIndex, Mode=OneWay}" 
+            HorizontalContentAlignment="Left" VerticalContentAlignment="Top" BorderThickness="0">
+        <Canvas 
+            Margin="-1" 
+            Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}, Path=ActualWidth, Mode=OneWay}"
+            Height="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}, Path=ActualHeight, Mode=OneWay}"
+        >
+            <Image 
+                Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}, Path=ActualWidth, Mode=OneWay}"
+                Height="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}, Path=ActualHeight, Mode=OneWay}"
+                Cursor="Hand"
+                Stretch="UniformToFill"
+            >
+                <Image.Source>
+                    <MultiBinding Converter="{StaticResource ImageThumbnailConverter}">
+                        <Binding Path="PreviewImages" Mode="OneWay" />
+                        <Binding Path="PreviewOffsetIndex" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type mvvm:UserControlView}}"></Binding>
+                    </MultiBinding>
+                </Image.Source>
+            </Image>
+
+            <Border 
+                Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}, Path=ActualWidth, Mode=OneWay}"
+                Height="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}, Path=ActualHeight, Mode=OneWay}"
+                Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type mvvm:UserControlView}}, Path=IsSelected, Converter={StaticResource BoolToVisibilityConverter}}"
+                BorderBrush="LimeGreen"
+                BorderThickness="4"
+                Background="Transparent"
+                CornerRadius="0"
+                Opacity="0.8"
+            />
+        </Canvas>
+    </Button>
+</mvvm:UserControlView>
