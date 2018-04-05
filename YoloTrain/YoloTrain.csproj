@@ -82,7 +82,10 @@
     <Compile Include="Config\ObjectNamesConfig.cs" />
     <Compile Include="Config\YoloProject.cs" />
     <Compile Include="Config\YoloTrainSettings.cs" />
+    <Compile Include="Converters\BoolToVisibilityConverter.cs" />
     <Compile Include="Converters\ImageThumbnailConverter.cs" />
+    <Compile Include="Converters\IsEqualToBoolConverter.cs" />
+    <Compile Include="Converters\IsEqualToVisibilityConverter.cs" />
     <Compile Include="Converters\NullableIntConverter.cs" />
     <Compile Include="Mvvm\CommandManagerHelper.cs" />
     <Compile Include="Mvvm\DelegateCommand.cs" />

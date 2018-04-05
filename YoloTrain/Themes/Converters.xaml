@@ -5,5 +5,8 @@
 
     <converters:NullableIntConverter x:Key="NullableIntConverter" />
     <converters:ImageThumbnailConverter x:Key="ImageThumbnailConverter" />
+    <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+    <converters:IsEqualToVisibilityConverter x:Key="IsEqualToVisibilityConverter" />
+    <converters:IsEqualToBoolConverter x:Key="IsEqualToBoolConverter" />
 
 </ResourceDictionary>
