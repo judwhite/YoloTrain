@@ -8,6 +8,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using YoloTrain.Mvvm;
+using YoloTrain.Utils;
 using Point = System.Windows.Point;
 
 namespace YoloTrain.Views
@@ -77,7 +78,7 @@ namespace YoloTrain.Views
                 dragSelectionCanvas.Visibility = Visibility.Collapsed;
                 e.Handled = true;
 
-                var imgOffset = GetAbsolutePlacement(imgTrain);
+                var imgOffset = Coords.GetAbsolutePlacement(imgTrain);
                 var img = _viewModel.CurrentBitmap;
 
                 Point curMouseDownPoint = e.GetPosition(imgTrain);
@@ -101,7 +102,7 @@ namespace YoloTrain.Views
             if (_isLeftMouseButtonDown)
             {
                 Point curMouseDownPoint = e.GetPosition(imgTrain);
-                Point imgOffset = GetAbsolutePlacement(imgTrain);
+                Point imgOffset = Coords.GetAbsolutePlacement(imgTrain);
 
                 var box = GetMouseBoxRectangle(curMouseDownPoint, imgOffset);
 
@@ -116,7 +117,7 @@ namespace YoloTrain.Views
 
                 var img = _viewModel.CurrentBitmap;
 
-                var yoloCoords = ImageCoordsToYoloCoords(img, imgTrain, imgOffset, box);
+                var yoloCoords = Coords.ViewportCoordsToYoloCoords(img, imgTrain, imgOffset, box);
 
                 if (yoloCoords.Height <= double.Epsilon || yoloCoords.Width <= double.Epsilon)
                 {
@@ -172,40 +173,6 @@ namespace YoloTrain.Views
             return new Box { X = tmpx, Y = tmpy, Width = tmpwidth, Height = tmpheight };
         }
 
-        private static YoloCoords ImageCoordsToYoloCoords(Bitmap img, System.Windows.Controls.Image imageViewport, Point imageViewportOffset, Box box)
-        {
-            var realx = box.X - imageViewportOffset.X;
-            var realy = box.Y - imageViewportOffset.Y;
-            var scaley = img.Height / imageViewport.ActualHeight;
-            var scalex = img.Width / imageViewport.ActualWidth;
-
-            int imgy = (int)(realy * scaley);
-            int imgx = (int)(realx * scalex);
-            int rwidth = (int)(box.Width * scalex);
-            int rheight = (int)(box.Height * scaley);
-
-            if (rwidth == 0 || rheight == 0)
-            {
-                return new YoloCoords();
-            }
-
-            return new YoloCoords
-            {
-                X = (rwidth / 2.0 + imgx) / img.Width,
-                Y = (rheight / 2.0 + imgy) / img.Height,
-                Width = (double)rwidth / img.Width,
-                Height = (double)rheight / img.Height
-            };
-        }
-
-        public static Point GetAbsolutePlacement(FrameworkElement element)
-        {
-            var absolutePos = element.PointToScreen(new Point(0, 0));
-            var posMW = Application.Current.MainWindow.PointToScreen(new Point(0, 0));
-            var relativePos = new Point(absolutePos.X - posMW.X, absolutePos.Y - posMW.Y);
-            return relativePos;
-        }
-
         private void UpdateCurrentImage()
         {
             if (_viewModel.CurrentImage == null)
@@ -230,7 +197,7 @@ namespace YoloTrain.Views
                     var width = double.Parse(parts[3]);
                     var height = double.Parse(parts[4]);
 
-                    Point imgOffset = GetAbsolutePlacement(imgTrain);
+                    Point imgOffset = Coords.GetAbsolutePlacement(imgTrain);
 
                     width *= imgTrain.ActualWidth;
                     height *= imgTrain.ActualHeight;
@@ -283,21 +250,5 @@ namespace YoloTrain.Views
                 }
             }
         }
-    }
-
-    public struct Box
-    {
-        public double X { get; set; }
-        public double Y { get; set; }
-        public double Width { get; set; }
-        public double Height { get; set; }
-    }
-
-    public struct YoloCoords
-    {
-        public double X { get; set; }
-        public double Y { get; set; }
-        public double Width { get; set; }
-        public double Height { get; set; }
     }
 }

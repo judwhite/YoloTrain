@@ -93,6 +93,9 @@
     <Compile Include="Mvvm\Events\ShowSelectFolderDialogEventArgs.cs" />
     <Compile Include="Mvvm\KeyBindingsHelper.cs" />
     <Compile Include="Mvvm\Model.cs" />
+    <Compile Include="Utils\Box.cs" />
+    <Compile Include="Utils\Coords.cs" />
+    <Compile Include="Utils\YoloCoords.cs" />
     <Compile Include="Views\Controls\ImagePreviewButton.xaml.cs">
       <DependentUpon>ImagePreviewButton.xaml</DependentUpon>
     </Compile>
