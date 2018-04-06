@@ -8,5 +8,6 @@
     <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
     <converters:IsEqualToVisibilityConverter x:Key="IsEqualToVisibilityConverter" />
     <converters:IsEqualToBoolConverter x:Key="IsEqualToBoolConverter" />
+    <converters:MultiAddConverter x:Key="MultiAddConverter" />
 
 </ResourceDictionary>

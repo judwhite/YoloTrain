@@ -86,6 +86,7 @@
     <Compile Include="Converters\ImageThumbnailConverter.cs" />
     <Compile Include="Converters\IsEqualToBoolConverter.cs" />
     <Compile Include="Converters\IsEqualToVisibilityConverter.cs" />
+    <Compile Include="Converters\MultiAddConverter.cs" />
     <Compile Include="Converters\NullableIntConverter.cs" />
     <Compile Include="Mvvm\CommandManagerHelper.cs" />
     <Compile Include="Mvvm\DelegateCommand.cs" />
