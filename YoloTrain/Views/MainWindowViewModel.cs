@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using Newtonsoft.Json;
@@ -318,6 +319,7 @@ namespace YoloTrain.Views
             }
 
             var imageFiles = Directory.GetFiles(imagesDirectory, "*.jpg", SearchOption.AllDirectories).ToList();
+            imageFiles.Sort(new NumericStringComparer());
             ImagePaths = new ObservableCollection<string>(imageFiles);
             if (imageFiles.Count > 0)
             {
@@ -328,6 +330,82 @@ namespace YoloTrain.Views
                     CurrentImagePosition = imageIndex + 1;
             }
         }
+
+        public class NumericStringComparer : IComparer<string>
+        {
+            // TODO (judwhite): this works but it's incredibly slow (2.5s for ~ 20k images). Fix perf.
+
+            private static readonly char[] _splitCharacters = { ' ', '-', '_', '.', '\\', '/', '(', ')', '[', ']', '{', '}', '@' };
+
+            public int Compare(string x, string y)
+            {
+                var x2 = GetModifiedString(x);
+                var y2 = GetModifiedString(y);
+
+                return string.CompareOrdinal(x2, y2);
+            }
+
+            private static string GetModifiedString(string v)
+            {
+                if (v == null)
+                    return null;
+
+                var sb = new StringBuilder();
+                var parts = v.ToLowerInvariant().Split(_splitCharacters, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var part in parts)
+                {
+                    var modPart = part;
+
+                    // prefix
+                    if (char.IsDigit(modPart[0]))
+                    {
+                        int i = 1;
+                        for (; i < modPart.Length; i++)
+                        {
+                            if (!char.IsDigit(modPart[i]))
+                                break;
+                        }
+                        var intPart = modPart.Substring(0, i);
+                        if (intPart.Length < 9)
+                        {
+                            var intValue = int.Parse(intPart);
+                            var prefix = $"{intValue:000000000}";
+                            if (i == modPart.Length)
+                            {
+                                sb.Append(prefix);
+                                sb.Append('_');
+                                continue;
+                            }
+                            else
+                            {
+                                modPart = prefix + modPart.Substring(i);
+                            }
+                        }
+                    }
+
+                    // suffix
+                    if (char.IsDigit(modPart[modPart.Length - 1]))
+                    {
+                        int i = modPart.Length - 1;
+                        for (; i >= 0; i--)
+                        {
+                            if (!char.IsDigit(modPart[i]))
+                                break;
+                        }
+                        var intPart = modPart.Substring(i + 1, modPart.Length - i - 1);
+                        if (intPart.Length < 9)
+                        {
+                            var intValue = int.Parse(intPart);
+                            var suffix = $"{intValue:000000000}";
+                            modPart = modPart.Substring(0, i + 1) + suffix;
+                        }
+                    }
+
+                    sb.Append(modPart);
+                    sb.Append('_');
+                }
+
+                return sb.ToString();
             }
         }
 
