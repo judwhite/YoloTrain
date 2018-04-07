@@ -17,9 +17,10 @@ namespace YoloTrain.Views
     public interface IMainWindowViewModel : IViewModel
     {
         ICommand ExitCommand { get; }
-        string CurrentImage { get; set; }
-        Bitmap CurrentBitmap { get; set; }
-        ObservableCollection<string> Classes { get; set; }
+        string CurrentImage { get; }
+        Bitmap CurrentBitmap { get; }
+        int CurrentImagePosition { get; set; }
+        ObservableCollection<string> Classes { get; }
     }
 
     public class MainWindowViewModel : ViewModel, IMainWindowViewModel
@@ -49,96 +50,108 @@ namespace YoloTrain.Views
         {
             if (e.PropertyName == nameof(CurrentImage))
             {
-                if (string.IsNullOrWhiteSpace(CurrentImage))
-                {
-                    CurrentBitmap = null;
-                    return;
-                }
-                CurrentBitmap = new Bitmap(Image.FromFile(CurrentImage));
+                OnCurrentImageChanged();
             }
 
             if (e.PropertyName == nameof(ImagePaths))
             {
-                if (ImagePaths == null)
-                {
-                    ImageCount = 0;
-                    return;
-                }
-
-                ImageCount = ImagePaths.Count;
+                OnImagePathsChanged();
             }
 
             if (e.PropertyName == nameof(CurrentImagePosition))
             {
-                if (CurrentImagePosition <= 0)
-                {
-                    PreviewImages = new string[0];
-                    CurrentImage = null;
-                    return;
-                }
-
-                CurrentImage = ImagePaths[CurrentImagePosition - 1];
-                var previewList = new List<string>();
-                int start = Math.Max(1, CurrentImagePosition - 2);
-                for (int i = start; i < start + 10 && i <= ImagePaths.Count; i++)
-                {
-                    previewList.Add(ImagePaths[i - 1]);
-                    if (i == CurrentImagePosition)
-                    {
-                        PreviewSelectedOffset = i - start;
-                    }
-                }
-                PreviewImages = previewList.ToArray();
-                PreviewStartOffset = start - 1;
+                OnCurrentImagePositionChanged();
             }
+        }
+
+        public ICommand NewProjectCommand
+        {
+            get => Get<ICommand>(nameof(NewProjectCommand));
+            private set => Set(nameof(NewProjectCommand), value);
+        }
+
+        public ICommand ChangeImageCommand
+        {
+            get => Get<ICommand>(nameof(ChangeImageCommand));
+            private set => Set(nameof(ChangeImageCommand), value);
+        }
+
+        public ICommand PreviousImageCommand
+        {
+            get => Get<ICommand>(nameof(PreviousImageCommand));
+            private set => Set(nameof(PreviousImageCommand), value);
+        }
+
+        public ICommand NextImageCommand
+        {
+            get => Get<ICommand>(nameof(NextImageCommand));
+            private set => Set(nameof(NextImageCommand), value);
+        }
+
+        public ICommand ExitCommand
+        {
+            get => Get<ICommand>(nameof(ExitCommand));
+            private set => Set(nameof(ExitCommand), value);
         }
 
         public int PreviewSelectedOffset
         {
             get => Get<int>(nameof(PreviewSelectedOffset));
-            set => Set(nameof(PreviewSelectedOffset), value);
+            private set => Set(nameof(PreviewSelectedOffset), value);
         }
 
         public int PreviewStartOffset
         {
             get => Get<int>(nameof(PreviewStartOffset));
-            set => Set(nameof(PreviewStartOffset), value);
+            private set => Set(nameof(PreviewStartOffset), value);
         }
 
         public int ImageCount
         {
             get => Get<int>(nameof(ImageCount));
-            set => Set(nameof(ImageCount), value);
-        }
-
-        private void ChangeImage(int n)
-        {
-            int newPosition = PreviewStartOffset + n + 1;
-            if (newPosition < 1 || newPosition >= ImagePaths.Count)
-                return;
-            CurrentImagePosition = newPosition;
-        }
-
-        private void NextImage()
-        {
-            if (ImagePaths == null || CurrentImagePosition >= ImagePaths.Count)
-                return;
-
-            CurrentImagePosition++;
-        }
-
-        private void PreviousImage()
-        {
-            if (ImagePaths == null || CurrentImagePosition <= 1)
-                return;
-
-            CurrentImagePosition--;
+            private set => Set(nameof(ImageCount), value);
         }
 
         public string[] PreviewImages
         {
             get => Get<string[]>(nameof(PreviewImages));
             private set => Set(nameof(PreviewImages), value);
+        }
+
+        public ObservableCollection<string> ImagePaths
+        {
+            get => Get<ObservableCollection<string>>(nameof(ImagePaths));
+            private set => Set(nameof(ImagePaths), value);
+        }
+
+        public string CurrentImage
+        {
+            get => Get<string>(nameof(CurrentImage));
+            private set => Set(nameof(CurrentImage), value);
+        }
+
+        public string CurrentImageRelativeFileName
+        {
+            get => Get<string>(nameof(CurrentImageRelativeFileName));
+            private set => Set(nameof(CurrentImageRelativeFileName), value);
+        }
+
+        public int CurrentImagePosition
+        {
+            get => Get<int>(nameof(CurrentImagePosition));
+            set => Set(nameof(CurrentImagePosition), value);
+        }
+
+        public ObservableCollection<string> Classes
+        {
+            get => Get<ObservableCollection<string>>(nameof(Classes));
+            private set => Set(nameof(Classes), value);
+        }
+
+        public Bitmap CurrentBitmap
+        {
+            get => Get<Bitmap>(nameof(CurrentBitmap));
+            private set => Set(nameof(CurrentBitmap), value);
         }
 
         private void LoadProject()
@@ -195,64 +208,94 @@ namespace YoloTrain.Views
             }
         }
 
-        public ObservableCollection<string> ImagePaths
+        private void ChangeImage(int n)
         {
-            get => Get<ObservableCollection<string>>(nameof(ImagePaths));
-            set => Set(nameof(ImagePaths), value);
+            int newPosition = PreviewStartOffset + n + 1;
+            if (newPosition < 1 || newPosition > ImagePaths.Count)
+                return;
+            CurrentImagePosition = newPosition;
         }
 
-        public ICommand NewProjectCommand
+        private void NextImage()
         {
-            get => Get<ICommand>(nameof(NewProjectCommand));
-            private set => Set(nameof(NewProjectCommand), value);
+            if (ImagePaths == null || CurrentImagePosition >= ImagePaths.Count)
+                return;
+
+            CurrentImagePosition++;
         }
 
-        public ICommand ChangeImageCommand
+        private void PreviousImage()
         {
-            get => Get<ICommand>(nameof(ChangeImageCommand));
-            private set => Set(nameof(ChangeImageCommand), value);
+            if (ImagePaths == null || CurrentImagePosition <= 1)
+                return;
+
+            CurrentImagePosition--;
         }
 
-        public ICommand PreviousImageCommand
+        private void OnCurrentImagePositionChanged()
         {
-            get => Get<ICommand>(nameof(PreviousImageCommand));
-            private set => Set(nameof(PreviousImageCommand), value);
+            if (CurrentImagePosition <= 0)
+            {
+                PreviewImages = new string[0];
+                CurrentImage = null;
+                return;
+            }
+
+            CurrentImage = ImagePaths[CurrentImagePosition - 1];
+            var previewList = new List<string>();
+            int start = Math.Max(1, CurrentImagePosition - 2);
+
+            // TODO (judwhite): determine how many preview images are visible on screen
+            if (start + 8 > ImagePaths.Count)
+            {
+                start = Math.Max(1, ImagePaths.Count - 8);
+            }
+            for (int i = start; i < start + 10 && i <= ImagePaths.Count; i++)
+            {
+                previewList.Add(ImagePaths[i - 1]);
+                if (i == CurrentImagePosition)
+                {
+                    PreviewSelectedOffset = i - start;
+                }
+            }
+            PreviewImages = previewList.ToArray();
+            PreviewStartOffset = start - 1;
         }
 
-        public ICommand NextImageCommand
+        private void OnImagePathsChanged()
         {
-            get => Get<ICommand>(nameof(NextImageCommand));
-            private set => Set(nameof(NextImageCommand), value);
+            if (ImagePaths == null)
+            {
+                ImageCount = 0;
+                return;
+            }
+
+            ImageCount = ImagePaths.Count;
         }
 
-        public ICommand ExitCommand
+        private void OnCurrentImageChanged()
         {
-            get => Get<ICommand>(nameof(ExitCommand));
-            private set => Set(nameof(ExitCommand), value);
-        }
+            if (string.IsNullOrWhiteSpace(CurrentImage))
+            {
+                CurrentBitmap = null;
+                CurrentImageRelativeFileName = null;
+                return;
+            }
 
-        public string CurrentImage
-        {
-            get => Get<string>(nameof(CurrentImage));
-            set => Set(nameof(CurrentImage), value);
-        }
+            CurrentBitmap = new Bitmap(Image.FromFile(CurrentImage));
 
-        public int CurrentImagePosition
-        {
-            get => Get<int>(nameof(CurrentImagePosition));
-            set => Set(nameof(CurrentImagePosition), value);
-        }
-
-        public ObservableCollection<string> Classes
-        {
-            get => Get<ObservableCollection<string>>(nameof(Classes));
-            set => Set(nameof(Classes), value);
-        }
-
-        public Bitmap CurrentBitmap
-        {
-            get => Get<Bitmap>(nameof(CurrentBitmap));
-            set => Set(nameof(CurrentBitmap), value);
+            if (!string.IsNullOrWhiteSpace(_yoloProject.DarknetExecutableFilePath))
+            {
+                var lowerDarknetExecutablePath = Path.GetDirectoryName(_yoloProject.DarknetExecutableFilePath).ToLowerInvariant();
+                if (CurrentImage.ToLowerInvariant().StartsWith(lowerDarknetExecutablePath))
+                    CurrentImageRelativeFileName = CurrentImage.Substring(lowerDarknetExecutablePath.Length + 1);
+                else
+                    CurrentImageRelativeFileName = CurrentImage;
+            }
+            else
+            {
+                CurrentImageRelativeFileName = CurrentImage;
+            }
         }
     }
 }

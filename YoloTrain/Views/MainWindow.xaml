@@ -27,7 +27,7 @@
 
         <views:MainMenu x:Name="MainMenu" Grid.Row="0" Grid.ColumnSpan="2" />
 
-        <Grid Grid.Row="1" Grid.ColumnSpan="3">
+        <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="100" />
@@ -63,7 +63,7 @@
             </Button>
 
             <!-- Position slider -->
-            <Slider x:Name="PositionSlider" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="16,8" Value="{Binding CurrentImagePosition, Mode=TwoWay}" Minimum="1" Maximum="{Binding Path=ImageCount}">
+            <Slider x:Name="PositionSlider" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="16,8,16,4" Value="{Binding CurrentImagePosition, Mode=TwoWay}" Minimum="1" Maximum="{Binding Path=ImageCount}">
                 <Slider.ToolTip>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="{Binding Path=CurrentImagePosition}" Margin="0" Padding="0" />
@@ -75,7 +75,7 @@
 
         </Grid>
 
-        <Grid Grid.Row="2" Margin="10,0,0,0">
+        <Grid Grid.Row="2" Grid.Column="0" Margin="16,0,0,0">
             <Image 
                 x:Name="imgTrain"  
                 HorizontalAlignment="Center" 
@@ -103,7 +103,7 @@
             </StackPanel>
         </Grid>
 
-        <Canvas x:Name="dragSelectionCanvas" Visibility="Collapsed">
+        <Canvas x:Name="dragSelectionCanvas" Grid.Row="0" Grid.Column="0" Grid.RowSpan="3" Grid.ColumnSpan="2" Visibility="Collapsed">
             <Border 
                     x:Name="dragSelectionBorder"
                     BorderBrush="Blue"
@@ -114,7 +114,7 @@
                 />
         </Canvas>
 
-        <Canvas x:Name="MainCanvas" Grid.RowSpan="3" Grid.ColumnSpan="2" />
+        <Canvas x:Name="MainCanvas" Grid.Row="0" Grid.Column="0" Grid.RowSpan="3" Grid.ColumnSpan="2" />
 
     </Grid>
 </mvvm:WindowView>
