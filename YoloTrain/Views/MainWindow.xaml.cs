@@ -9,6 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using YoloTrain.Mvvm;
 using YoloTrain.Utils;
+using YoloTrain.Views.Controls;
 using Point = System.Windows.Point;
 
 namespace YoloTrain.Views
@@ -184,76 +185,63 @@ namespace YoloTrain.Views
             if (_viewModel.CurrentImage == null)
                 return;
 
-            MainCanvas.Children.Clear();
+            MouseHelper.SetWaitCursor();
 
-            string imageDirectory = Path.GetDirectoryName(_viewModel.CurrentImage);
-            string imageBoundsFileName = Path.Combine(imageDirectory, Path.GetFileNameWithoutExtension(_viewModel.CurrentImage) + ".txt");
-            if (File.Exists(imageBoundsFileName))
+            try
             {
-                var lines = File.ReadAllLines(imageBoundsFileName);
-                foreach (var line in lines)
+                MainCanvas.Children.Clear();
+
+                string imageDirectory = Path.GetDirectoryName(_viewModel.CurrentImage);
+                string imageBoundsFileName = Path.Combine(imageDirectory, Path.GetFileNameWithoutExtension(_viewModel.CurrentImage) + ".txt");
+                if (File.Exists(imageBoundsFileName))
                 {
-                    var parts = line.Split(' ');
-                    if (parts.Length != 5)
-                        continue;
+                    var lines = File.ReadAllLines(imageBoundsFileName);
+                    for (int i = 0; i < lines.Length; i++)
+                    {
+                        var line = lines[i];
 
-                    var classNumber = int.Parse(parts[0]);
-                    var x = double.Parse(parts[1]);
-                    var y = double.Parse(parts[2]);
-                    var width = double.Parse(parts[3]);
-                    var height = double.Parse(parts[4]);
+                        var parts = line.Split(' ');
+                        if (parts.Length != 5)
+                            continue;
 
-                    Point imgOffset = Coords.GetAbsolutePlacement(imgTrain);
+                        var yolo = new YoloCoords
+                        {
+                            Class = int.Parse(parts[0]),
+                            X = double.Parse(parts[1]),
+                            Y = double.Parse(parts[2]),
+                            Width = double.Parse(parts[3]),
+                            Height = double.Parse(parts[4])
+                        };
 
-                    width *= imgTrain.ActualWidth;
-                    height *= imgTrain.ActualHeight;
+                        var width = yolo.Width * imgTrain.ActualWidth;
+                        var height = yolo.Height * imgTrain.ActualHeight;
 
-                    x = x * imgTrain.ActualWidth - width / 2.0;
-                    y = y * imgTrain.ActualHeight - height / 2.0;
+                        var markedRegion = new MarkedRegion
+                        {
+                            // TODO (judwhite): check for out of bounds class number
+                            Text = _viewModel.Classes[yolo.Class.Value].Replace('_', ' '),
+                            RegionIndex = i,
+                            YoloCoords = yolo,
+                            Height = height,
+                            Width = width,
+                        };
 
-                    var left = imgOffset.X + x;
-                    var top = imgOffset.Y + y;
+                        MainCanvas.Children.Add(markedRegion);
 
-                    Canvas canvas = new Canvas();
-                    canvas.Background = new SolidColorBrush(Colors.LightBlue);
-                    canvas.Opacity = 0.5;
-                    canvas.Visibility = Visibility.Visible;
-                    canvas.HorizontalAlignment = HorizontalAlignment.Left;
-                    canvas.VerticalAlignment = VerticalAlignment.Top;
+                        Point imgOffset = Coords.GetAbsolutePlacement(imgTrain);
+                        var x = yolo.X * imgTrain.ActualWidth - width / 2.0;
+                        var y = yolo.Y * imgTrain.ActualHeight - height / 2.0;
+                        var left = imgOffset.X + x;
+                        var top = imgOffset.Y + y;
 
-                    var border = new Border();
-                    border.BorderBrush = new SolidColorBrush(Colors.Blue);
-                    border.BorderThickness = new Thickness(1);
-                    border.CornerRadius = new CornerRadius(1);
-                    border.Height = height;
-                    border.Width = width;
-                    canvas.Children.Add(border);
-
-                    var textBlock = new TextBlock();
-                    textBlock.Text = _viewModel.Classes[classNumber].Replace('_', ' ');
-                    textBlock.Background = new SolidColorBrush(Colors.Transparent);
-                    textBlock.Foreground = new SolidColorBrush(Colors.Black);
-                    textBlock.SetValue(TextBlock.FontStretchProperty, FontStretches.Condensed);
-                    textBlock.SetValue(TextBlock.FontWeightProperty, FontWeights.Bold);
-                    textBlock.LineStackingStrategy = LineStackingStrategy.BlockLineHeight;
-                    textBlock.FontSize = 11;
-                    textBlock.LineHeight = 10;
-                    textBlock.HorizontalAlignment = HorizontalAlignment.Left;
-                    textBlock.VerticalAlignment = VerticalAlignment.Top;
-                    textBlock.Padding = new Thickness(2);
-                    textBlock.TextWrapping = TextWrapping.Wrap;
-                    textBlock.Width = width;
-                    textBlock.Height = height;
-                    canvas.Children.Add(textBlock);
-
-                    canvas.Height = height;
-                    canvas.Width = width;
-
-                    MainCanvas.Children.Add(canvas);
-
-                    Canvas.SetLeft(canvas, left);
-                    Canvas.SetTop(canvas, top);
+                        Canvas.SetLeft(markedRegion, left);
+                        Canvas.SetTop(markedRegion, top);
+                    }
                 }
+            }
+            finally
+            {
+                MouseHelper.ResetCursor();
             }
         }
     }

@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using YoloTrain.Mvvm;
+using YoloTrain.Utils;
 
 namespace YoloTrain.Views.Controls
 {
@@ -16,6 +17,9 @@ namespace YoloTrain.Views.Controls
 
         public static readonly DependencyProperty IsSelectedProperty =
             DependencyProperty.Register("IsSelected", typeof(bool), typeof(MarkedRegion), new PropertyMetadata());
+
+        public static readonly DependencyProperty YoloCoordsProperty =
+            DependencyProperty.Register("YoloCoords", typeof(YoloCoords), typeof(MarkedRegion), new PropertyMetadata());
 
         public MarkedRegion()
         {
@@ -40,5 +44,10 @@ namespace YoloTrain.Views.Controls
             set => SetValue(IsSelectedProperty, value);
         }
 
+        public YoloCoords YoloCoords
+        {
+            get => (YoloCoords)GetValue(YoloCoordsProperty);
+            set => SetValue(YoloCoordsProperty, value);
+        }
     }
 }
