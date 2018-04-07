@@ -17,6 +17,8 @@ namespace YoloTrain.Views
 {
     public interface IMainWindowViewModel : IViewModel
     {
+        void SaveProject();
+
         ICommand ExitCommand { get; }
         ICommand SelectRegionCommand { get; }
         string CurrentImage { get; }
@@ -39,6 +41,7 @@ namespace YoloTrain.Views
 
     public class MainWindowViewModel : ViewModel, IMainWindowViewModel
     {
+        private string _yoloProjectFileName;
         private YoloProject _yoloProject;
 
         public MainWindowViewModel()
@@ -245,9 +248,29 @@ namespace YoloTrain.Views
             private set => Set(nameof(ImageRegions), value);
         }
 
+        public void SaveProject()
+        {
+            if (_yoloProject == null)
+                return;
+
+            MouseHelper.SetWaitCursor();
+            try
+            {
+                _yoloProject.LastImageFilePath = CurrentImage;
+                var json = JsonConvert.SerializeObject(_yoloProject);
+                File.WriteAllText(_yoloProjectFileName, json);
+            }
+            finally
+            {
+                MouseHelper.ResetCursor();
+            }
+        }
+
         private void LoadProject()
         {
             CurrentImagePosition = 0;
+            _yoloProjectFileName = null;
+            _yoloProject = null;
 
             const string yoloTrainConfigFileName = "yolotrain.cfg";
             if (!File.Exists(yoloTrainConfigFileName))
@@ -262,6 +285,7 @@ namespace YoloTrain.Views
 
             var projectJson = File.ReadAllText(projectFileName);
             _yoloProject = JsonConvert.DeserializeObject<YoloProject>(projectJson);
+            _yoloProjectFileName = projectFileName;
 
             string basePath = Path.GetDirectoryName(_yoloProject.DarknetExecutableFilePath);
 
@@ -278,25 +302,32 @@ namespace YoloTrain.Views
                     var namesFileName = Path.Combine(basePath, parts[1].Trim());
                     if (File.Exists(namesFileName))
                     {
-                        var classes = File.ReadAllLines(namesFileName).Where(p => !string.IsNullOrWhiteSpace(p))
+                        var classes = File.ReadAllLines(namesFileName)
+                                          .Where(p => !string.IsNullOrWhiteSpace(p))
                                           .ToList();
                         Classes = new ObservableCollection<string>(classes);
                     }
                 }
             }
 
-            string imagesDirectory = Path.Combine(basePath, _yoloProject.ImagesDirectory.Replace("/", @"\"));
+            string imagesDirectory = Path.Combine(basePath, _yoloProject.ImagesDirectory);
             if (!Directory.Exists(imagesDirectory))
             {
                 Directory.CreateDirectory(imagesDirectory);
                 return;
             }
 
-            string[] imageFiles = Directory.GetFiles(imagesDirectory, "*.jpg", SearchOption.AllDirectories);
+            var imageFiles = Directory.GetFiles(imagesDirectory, "*.jpg", SearchOption.AllDirectories).ToList();
             ImagePaths = new ObservableCollection<string>(imageFiles);
-            if (imageFiles.Length > 0)
+            if (imageFiles.Count > 0)
             {
-                CurrentImagePosition = 1;
+                var imageIndex = imageFiles.IndexOf(_yoloProject.LastImageFilePath);
+                if (imageIndex == -1)
+                    CurrentImagePosition = 1;
+                else
+                    CurrentImagePosition = imageIndex + 1;
+            }
+        }
             }
         }
 
