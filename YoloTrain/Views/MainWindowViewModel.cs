@@ -10,6 +10,7 @@ using System.Windows.Input;
 using Newtonsoft.Json;
 using YoloTrain.Config;
 using YoloTrain.Mvvm;
+using YoloTrain.Utils;
 using YoloTrain.Views.Project;
 
 namespace YoloTrain.Views
@@ -17,10 +18,23 @@ namespace YoloTrain.Views
     public interface IMainWindowViewModel : IViewModel
     {
         ICommand ExitCommand { get; }
+        ICommand SelectRegionCommand { get; }
         string CurrentImage { get; }
         Bitmap CurrentBitmap { get; }
         int CurrentImagePosition { get; set; }
         ObservableCollection<string> Classes { get; }
+        ObservableCollection<YoloCoords> ImageRegions { get; }
+
+        ICommand MoveLeftCommand { get; }
+        ICommand MoveRightCommand { get; }
+        ICommand MoveUpCommand { get; }
+        ICommand MoveDownCommand { get; }
+        ICommand GrowVerticalCommand { get; }
+        ICommand ShrinkVerticalCommand { get; }
+        ICommand GrowHorizontalCommand { get; }
+        ICommand ShrinkHorizontalCommand { get; }
+        ICommand ClearRegionsCommand { get; }
+        ICommand DeleteImageCommand { get; }
     }
 
     public class MainWindowViewModel : ViewModel, IMainWindowViewModel
@@ -29,15 +43,20 @@ namespace YoloTrain.Views
 
         public MainWindowViewModel()
         {
-            NewProjectCommand = new DelegateCommand(() =>
-            {
-                var result = ShowWindow<NewProjectWindow>();
-                if (result == true)
-                    LoadProject();
-            });
+            NewProjectCommand = new DelegateCommand(NewProject);
             NextImageCommand = new DelegateCommand(NextImage);
             PreviousImageCommand = new DelegateCommand(PreviousImage);
             ChangeImageCommand = new DelegateCommand<int>(ChangeImage);
+            SelectRegionCommand = new DelegateCommand<int>(SelectRegion);
+
+            MoveLeftCommand = new DelegateCommand(() => ChangeImageBounds(-1, 0, 0, 0));
+            MoveRightCommand = new DelegateCommand(() => ChangeImageBounds(1, 0, 0, 0));
+            MoveUpCommand = new DelegateCommand(() => ChangeImageBounds(0, -1, 0, 0));
+            MoveDownCommand = new DelegateCommand(() => ChangeImageBounds(0, 1, 0, 0));
+            GrowVerticalCommand = new DelegateCommand(() => ChangeImageBounds(0, 0, 0, 1));
+            ShrinkVerticalCommand = new DelegateCommand(() => ChangeImageBounds(0, 0, 0, -1));
+            GrowHorizontalCommand = new DelegateCommand(() => ChangeImageBounds(0, 0, 1, 0));
+            ShrinkHorizontalCommand = new DelegateCommand(() => ChangeImageBounds(0, 0, -1, 0));
 
             ExitCommand = new DelegateCommand(() => Application.Current.MainWindow.Close());
 
@@ -88,10 +107,76 @@ namespace YoloTrain.Views
             private set => Set(nameof(NextImageCommand), value);
         }
 
+        public ICommand SelectRegionCommand
+        {
+            get => Get<ICommand>(nameof(SelectRegionCommand));
+            private set => Set(nameof(SelectRegionCommand), value);
+        }
+
         public ICommand ExitCommand
         {
             get => Get<ICommand>(nameof(ExitCommand));
             private set => Set(nameof(ExitCommand), value);
+        }
+
+        public ICommand MoveLeftCommand
+        {
+            get => Get<ICommand>(nameof(MoveLeftCommand));
+            private set => Set(nameof(MoveLeftCommand), value);
+        }
+
+        public ICommand MoveRightCommand
+        {
+            get => Get<ICommand>(nameof(MoveRightCommand));
+            private set => Set(nameof(MoveRightCommand), value);
+        }
+
+        public ICommand MoveUpCommand
+        {
+            get => Get<ICommand>(nameof(MoveUpCommand));
+            private set => Set(nameof(MoveUpCommand), value);
+        }
+
+        public ICommand MoveDownCommand
+        {
+            get => Get<ICommand>(nameof(MoveDownCommand));
+            private set => Set(nameof(MoveDownCommand), value);
+        }
+
+        public ICommand GrowVerticalCommand
+        {
+            get => Get<ICommand>(nameof(GrowVerticalCommand));
+            private set => Set(nameof(GrowVerticalCommand), value);
+        }
+
+        public ICommand ShrinkVerticalCommand
+        {
+            get => Get<ICommand>(nameof(ShrinkVerticalCommand));
+            private set => Set(nameof(ShrinkVerticalCommand), value);
+        }
+
+        public ICommand GrowHorizontalCommand
+        {
+            get => Get<ICommand>(nameof(GrowHorizontalCommand));
+            private set => Set(nameof(GrowHorizontalCommand), value);
+        }
+
+        public ICommand ShrinkHorizontalCommand
+        {
+            get => Get<ICommand>(nameof(ShrinkHorizontalCommand));
+            private set => Set(nameof(ShrinkHorizontalCommand), value);
+        }
+
+        public ICommand ClearRegionsCommand
+        {
+            get => Get<ICommand>(nameof(ClearRegionsCommand));
+            private set => Set(nameof(ClearRegionsCommand), value);
+        }
+
+        public ICommand DeleteImageCommand
+        {
+            get => Get<ICommand>(nameof(DeleteImageCommand));
+            private set => Set(nameof(DeleteImageCommand), value);
         }
 
         public int PreviewSelectedOffset
@@ -154,6 +239,12 @@ namespace YoloTrain.Views
             private set => Set(nameof(CurrentBitmap), value);
         }
 
+        public ObservableCollection<YoloCoords> ImageRegions
+        {
+            get => Get<ObservableCollection<YoloCoords>>(nameof(ImageRegions));
+            private set => Set(nameof(ImageRegions), value);
+        }
+
         private void LoadProject()
         {
             CurrentImagePosition = 0;
@@ -187,7 +278,8 @@ namespace YoloTrain.Views
                     var namesFileName = Path.Combine(basePath, parts[1].Trim());
                     if (File.Exists(namesFileName))
                     {
-                        var classes = File.ReadAllLines(namesFileName).Where(p => !string.IsNullOrWhiteSpace(p)).ToList();
+                        var classes = File.ReadAllLines(namesFileName).Where(p => !string.IsNullOrWhiteSpace(p))
+                                          .ToList();
                         Classes = new ObservableCollection<string>(classes);
                     }
                 }
@@ -208,12 +300,35 @@ namespace YoloTrain.Views
             }
         }
 
+        private void SelectRegion(int n)
+        {
+            SelectedRegionIndex = n;
+        }
+
+        public int? SelectedRegionIndex
+        {
+            get => Get<int?>(nameof(SelectedRegionIndex));
+            private set => Set(nameof(SelectedRegionIndex), value);
+        }
+
         private void ChangeImage(int n)
         {
             int newPosition = PreviewStartOffset + n + 1;
             if (newPosition < 1 || newPosition > ImagePaths.Count)
                 return;
             CurrentImagePosition = newPosition;
+        }
+
+        private void ChangeImageBounds(int x, int y, int w, int h)
+        {
+            // TODO (judwhite)
+        }
+
+        private void NewProject()
+        {
+            var result = ShowWindow<NewProjectWindow>();
+            if (result == true)
+                LoadProject();
         }
 
         private void NextImage()
@@ -275,6 +390,8 @@ namespace YoloTrain.Views
 
         private void OnCurrentImageChanged()
         {
+            UpdateImageRegions();
+
             if (string.IsNullOrWhiteSpace(CurrentImage))
             {
                 CurrentBitmap = null;
@@ -286,7 +403,8 @@ namespace YoloTrain.Views
 
             if (!string.IsNullOrWhiteSpace(_yoloProject.DarknetExecutableFilePath))
             {
-                var lowerDarknetExecutablePath = Path.GetDirectoryName(_yoloProject.DarknetExecutableFilePath).ToLowerInvariant();
+                var lowerDarknetExecutablePath = Path
+                    .GetDirectoryName(_yoloProject.DarknetExecutableFilePath).ToLowerInvariant();
                 if (CurrentImage.ToLowerInvariant().StartsWith(lowerDarknetExecutablePath))
                     CurrentImageRelativeFileName = CurrentImage.Substring(lowerDarknetExecutablePath.Length + 1);
                 else
@@ -296,6 +414,42 @@ namespace YoloTrain.Views
             {
                 CurrentImageRelativeFileName = CurrentImage;
             }
+        }
+
+        private void UpdateImageRegions()
+        {
+            if (string.IsNullOrWhiteSpace(CurrentImage))
+                return;
+
+            string imageDirectory = Path.GetDirectoryName(CurrentImage);
+            string imageBoundsFileName =
+                Path.Combine(imageDirectory, Path.GetFileNameWithoutExtension(CurrentImage) + ".txt");
+
+            var list = new ObservableCollection<YoloCoords>();
+            if (File.Exists(imageBoundsFileName))
+            {
+                var lines = File.ReadAllLines(imageBoundsFileName);
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    var line = lines[i];
+
+                    var parts = line.Split(' ');
+                    if (parts.Length != 5)
+                        continue;
+
+                    var yolo = new YoloCoords
+                    {
+                        Class = int.Parse(parts[0]),
+                        X = double.Parse(parts[1]),
+                        Y = double.Parse(parts[2]),
+                        Width = double.Parse(parts[3]),
+                        Height = double.Parse(parts[4])
+                    };
+
+                    list.Add(yolo);
+                }
+            }
+            ImageRegions = list;
         }
     }
 }

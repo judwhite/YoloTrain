@@ -1,11 +1,9 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Drawing;
-using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using YoloTrain.Mvvm;
 using YoloTrain.Utils;
@@ -50,7 +48,7 @@ namespace YoloTrain.Views
 
         private void _viewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(_viewModel.CurrentImage))
+            if (e.PropertyName == nameof(_viewModel.ImageRegions))
             {
                 UpdateCurrentImage();
             }
@@ -182,61 +180,41 @@ namespace YoloTrain.Views
 
         private void UpdateCurrentImage()
         {
-            if (_viewModel.CurrentImage == null)
-                return;
-
             MouseHelper.SetWaitCursor();
-
             try
             {
                 MainCanvas.Children.Clear();
 
-                string imageDirectory = Path.GetDirectoryName(_viewModel.CurrentImage);
-                string imageBoundsFileName = Path.Combine(imageDirectory, Path.GetFileNameWithoutExtension(_viewModel.CurrentImage) + ".txt");
-                if (File.Exists(imageBoundsFileName))
+                if (_viewModel.ImageRegions == null)
+                    return;
+
+                for (int i = 0; i < _viewModel.ImageRegions.Count; i++)
                 {
-                    var lines = File.ReadAllLines(imageBoundsFileName);
-                    for (int i = 0; i < lines.Length; i++)
+                    var yolo = _viewModel.ImageRegions[i];
+
+                    var width = yolo.Width * imgTrain.ActualWidth;
+                    var height = yolo.Height * imgTrain.ActualHeight;
+
+                    var markedRegion = new MarkedRegion
                     {
-                        var line = lines[i];
+                        // TODO (judwhite): check for out of bounds class number
+                        Text = _viewModel.Classes[yolo.Class.Value].Replace('_', ' '),
+                        RegionIndex = i,
+                        YoloCoords = yolo,
+                        Height = height,
+                        Width = width,
+                    };
 
-                        var parts = line.Split(' ');
-                        if (parts.Length != 5)
-                            continue;
+                    MainCanvas.Children.Add(markedRegion);
 
-                        var yolo = new YoloCoords
-                        {
-                            Class = int.Parse(parts[0]),
-                            X = double.Parse(parts[1]),
-                            Y = double.Parse(parts[2]),
-                            Width = double.Parse(parts[3]),
-                            Height = double.Parse(parts[4])
-                        };
+                    Point imgOffset = Coords.GetAbsolutePlacement(imgTrain);
+                    var x = yolo.X * imgTrain.ActualWidth - width / 2.0;
+                    var y = yolo.Y * imgTrain.ActualHeight - height / 2.0;
+                    var left = imgOffset.X + x;
+                    var top = imgOffset.Y + y;
 
-                        var width = yolo.Width * imgTrain.ActualWidth;
-                        var height = yolo.Height * imgTrain.ActualHeight;
-
-                        var markedRegion = new MarkedRegion
-                        {
-                            // TODO (judwhite): check for out of bounds class number
-                            Text = _viewModel.Classes[yolo.Class.Value].Replace('_', ' '),
-                            RegionIndex = i,
-                            YoloCoords = yolo,
-                            Height = height,
-                            Width = width,
-                        };
-
-                        MainCanvas.Children.Add(markedRegion);
-
-                        Point imgOffset = Coords.GetAbsolutePlacement(imgTrain);
-                        var x = yolo.X * imgTrain.ActualWidth - width / 2.0;
-                        var y = yolo.Y * imgTrain.ActualHeight - height / 2.0;
-                        var left = imgOffset.X + x;
-                        var top = imgOffset.Y + y;
-
-                        Canvas.SetLeft(markedRegion, left);
-                        Canvas.SetTop(markedRegion, top);
-                    }
+                    Canvas.SetLeft(markedRegion, left);
+                    Canvas.SetTop(markedRegion, top);
                 }
             }
             finally
