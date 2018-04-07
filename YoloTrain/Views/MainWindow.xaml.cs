@@ -32,8 +32,14 @@ namespace YoloTrain.Views
             _viewModel.PropertyChanged += _viewModel_PropertyChanged;
 
             Loaded += MainWindow_Loaded;
+            SizeChanged += MainWindow_SizeChanged;
 
             HandleEscape = false;
+        }
+
+        private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            UpdateCurrentImage();
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
