@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media.Imaging;
 using YoloTrain.Mvvm;
 using YoloTrain.Utils;
@@ -52,6 +53,75 @@ namespace YoloTrain.Views
             {
                 UpdateCurrentImage();
             }
+
+            if (e.PropertyName == nameof(_viewModel.SelectedRegionIndex))
+            {
+                UpdateCurrentImage();
+                ShowSelectedRegionProperties();
+            }
+        }
+
+        private void ShowSelectedRegionProperties()
+        {
+            var idx = _viewModel.SelectedRegionIndex;
+            if (idx == null)
+            {
+                imgPreview.Source = null;
+                txtCoords.Text = "";
+                return;
+            }
+
+            var region = _viewModel.ImageRegions[idx.Value];
+
+            var yoloCoords = new YoloCoords
+            {
+                X = region.X,
+                Y = region.Y,
+                Height = region.Height,
+                Width = region.Width
+            };
+
+            ShowYolo(yoloCoords);
+        }
+
+        private void ShowYolo(YoloCoords yoloCoords)
+        {
+            MouseHelper.SetWaitCursor();
+            try
+            {
+                var img = _viewModel.CurrentBitmap;
+
+                if (yoloCoords.Height <= double.Epsilon || yoloCoords.Width <= double.Epsilon)
+                {
+                    imgPreview.Source = null;
+                    txtCoords.Text = "";
+                    return;
+                }
+
+                // render how translating back from yolo coords will look
+                var rwidth = (int)(yoloCoords.Width * img.Width);
+                var rheight = (int)(yoloCoords.Height * img.Height);
+                var imgx = (int)(yoloCoords.X * img.Width - rwidth / 2.0);
+                var imgy = (int)(yoloCoords.Y * img.Height - rheight / 2.0);
+
+                var rect = new Rectangle(imgx, imgy, rwidth, rheight);
+                var newImg = img.Clone(rect, img.PixelFormat);
+
+                var bmpsource = Imaging.CreateBitmapSourceFromHBitmap(
+                    newImg.GetHbitmap(),
+                    IntPtr.Zero,
+                    Int32Rect.Empty,
+                    BitmapSizeOptions.FromWidthAndHeight(rwidth, rheight)
+                );
+
+                txtCoords.Text = $"x: {imgx} y: {imgy} w: {rwidth}px h: {rheight}px";
+
+                imgPreview.Source = bmpsource;
+            }
+            finally
+            {
+                MouseHelper.ResetCursor();
+            }
         }
 
         protected override void OnInitialized(EventArgs e)
@@ -80,25 +150,18 @@ namespace YoloTrain.Views
             {
                 _isLeftMouseButtonDown = false;
                 imgTrain.ReleaseMouseCapture();
-                dragSelectionCanvas.Visibility = Visibility.Collapsed;
-                e.Handled = true;
-
-                var imgOffset = Coords.GetAbsolutePlacement(imgTrain);
-                var img = _viewModel.CurrentBitmap;
 
                 Point curMouseDownPoint = e.GetPosition(imgTrain);
+                Point imgOffset = Coords.GetAbsolutePlacement(imgTrain);
+
+                dragSelectionCanvas.Visibility = Visibility.Collapsed;
+
+                e.Handled = true;
+
                 var box = GetMouseBoxRectangle(curMouseDownPoint, imgOffset);
-
-                var realx = box.X - imgOffset.X;
-                var realy = box.Y - imgOffset.Y;
-                var scaley = img.Height / imgTrain.ActualHeight;
-                var scalex = img.Width / imgTrain.ActualWidth;
-                var imgy = realy * scaley;
-                var imgx = realx * scalex;
-
-                var rect = new Rectangle((int)imgx, (int)imgy, (int)(box.Width * scalex), (int)(box.Height * scaley));
-                if (rect.Width == 0 || rect.Height == 0)
-                    return;
+                var img = _viewModel.CurrentBitmap;
+                var yoloCoords = Coords.ViewportCoordsToYoloCoords(img, imgTrain, imgOffset, box);
+                ShowYolo(yoloCoords);
             }
         }
 
@@ -121,33 +184,8 @@ namespace YoloTrain.Views
                 e.Handled = true;
 
                 var img = _viewModel.CurrentBitmap;
-
                 var yoloCoords = Coords.ViewportCoordsToYoloCoords(img, imgTrain, imgOffset, box);
-
-                if (yoloCoords.Height <= double.Epsilon || yoloCoords.Width <= double.Epsilon)
-                {
-                    txtCoords.Text = "";
-                    return;
-                }
-
-                txtCoords.Text = string.Format("x: {0:0.000000} y: {1:0.000000} w: {2:0.000000} h: {3:0.000000}",
-                    yoloCoords.X, yoloCoords.Y, yoloCoords.Width, yoloCoords.Height);
-
-                // close to 'box' but renders how translating back from yolo coords will look
-                var rwidth = (int)(yoloCoords.Width * img.Width);
-                var rheight = (int)(yoloCoords.Height * img.Height);
-                var imgx = (int)(yoloCoords.X * img.Width - rwidth / 2.0);
-                var imgy = (int)(yoloCoords.Y * img.Height - rheight / 2.0);
-
-                var rect = new Rectangle(imgx, imgy, rwidth, rheight);
-                var newImg = img.Clone(rect, img.PixelFormat);
-
-                var bmpsource = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                   newImg.GetHbitmap(),
-                   IntPtr.Zero,
-                   Int32Rect.Empty,
-                   BitmapSizeOptions.FromWidthAndHeight(rwidth, rheight));
-                imgPreview.Source = bmpsource;
+                ShowYolo(yoloCoords);
             }
         }
 
@@ -180,7 +218,7 @@ namespace YoloTrain.Views
 
         private void UpdateCurrentImage()
         {
-            MouseHelper.SetWaitCursor();
+            //MouseHelper.SetWaitCursor();
             try
             {
                 MainCanvas.Children.Clear();
@@ -203,6 +241,7 @@ namespace YoloTrain.Views
                         YoloCoords = yolo,
                         Height = height,
                         Width = width,
+                        IsSelected = _viewModel.SelectedRegionIndex == i
                     };
 
                     MainCanvas.Children.Add(markedRegion);
@@ -219,7 +258,7 @@ namespace YoloTrain.Views
             }
             finally
             {
-                MouseHelper.ResetCursor();
+                //MouseHelper.ResetCursor();
             }
         }
     }

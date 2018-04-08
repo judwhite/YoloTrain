@@ -93,42 +93,46 @@
         </Grid>
 
         <Grid Grid.Row="2" Grid.Column="1" Margin="10,0">
-            <StackPanel>
-                <Image x:Name="imgPreview" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,10" />
-                <StackPanel>
-                    <TextBlock x:Name="txtCoords" />
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Button Grid.Row="0" Grid.Column="0" Content="Left" Width="85" Margin="2" Command="{Binding MoveLeftCommand}" />
-                        <Button Grid.Row="0" Grid.Column="1" Content="Right" Width="85" Margin="2" Command="{Binding MoveRightCommand}" />
-                        <Button Grid.Row="1" Grid.Column="0" Content="Up" Width="85" Margin="2" Command="{Binding MoveUpCommand}" />
-                        <Button Grid.Row="1" Grid.Column="1" Content="Down" Width="85" Margin="2" Command="{Binding MoveDownCommand}" />
-                        <Button Grid.Row="2" Grid.Column="0" Content="Grow Vert" Width="85" Margin="2" Command="{Binding GrowVerticalCommand}" />
-                        <Button Grid.Row="2" Grid.Column="1" Content="Shrink Vert" Width="85" Margin="2" Command="{Binding ShrinkVerticalCommand}" />
-                        <Button Grid.Row="3" Grid.Column="0" Content="Grow Horiz" Width="85" Margin="2" Command="{Binding GrowHorizontalCommand}" />
-                        <Button Grid.Row="3" Grid.Column="1" Content="Shrink Horiz" Width="85" Margin="2" Command="{Binding ShrinkHorizontalCommand}" />
-                        <Button Grid.Row="4" Grid.Column="0" Content="Clear Regions"  Width="85" Margin="2" Command="{Binding ClearRegionsCommand}" />
-                        <Button Grid.Row="4" Grid.Column="1" Content="Delete Image"  Width="85" Margin="2" Command="{Binding DeleteImageCommand}" />
-                    </Grid>
-                    <ComboBox x:Name="cmbClass" IsEditable="True" IsTextSearchEnabled="True" ToolTip="Class" Margin="0,10" />
-                    <StackPanel Orientation="Horizontal">
-                        <Button x:Name="btnSave" Content="Save" Margin="0,0,10,0" Width="50" />
-                        <Button x:Name="btnDiscard" Content="Discard" Width="50" />
-                    </StackPanel>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
+            <Image Grid.Row="1" x:Name="imgPreview" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,10" />
+
+            <StackPanel Grid.Row="0">
+                <TextBlock x:Name="txtCoords" />
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Row="0" Grid.Column="0" Content="Left" Width="85" Margin="2" Command="{Binding MoveLeftCommand}" />
+                    <Button Grid.Row="0" Grid.Column="1" Content="Right" Width="85" Margin="2" Command="{Binding MoveRightCommand}" />
+                    <Button Grid.Row="1" Grid.Column="0" Content="Up" Width="85" Margin="2" Command="{Binding MoveUpCommand}" />
+                    <Button Grid.Row="1" Grid.Column="1" Content="Down" Width="85" Margin="2" Command="{Binding MoveDownCommand}" />
+                    <Button Grid.Row="2" Grid.Column="0" Content="Grow Bottom" Width="85" Margin="2" Command="{Binding GrowVerticalCommand}" />
+                    <Button Grid.Row="2" Grid.Column="1" Content="Trim Bottom" Width="85" Margin="2" Command="{Binding ShrinkVerticalCommand}" />
+                    <Button Grid.Row="3" Grid.Column="0" Content="Grow Right" Width="85" Margin="2" Command="{Binding GrowHorizontalCommand}" />
+                    <Button Grid.Row="3" Grid.Column="1" Content="Trim Right" Width="85" Margin="2" Command="{Binding ShrinkHorizontalCommand}" />
+                    <Button Grid.Row="4" Grid.Column="0" Content="Clear Regions"  Width="85" Margin="2" Command="{Binding ClearRegionsCommand}" />
+                    <Button Grid.Row="4" Grid.Column="1" Content="Delete Image"  Width="85" Margin="2" Command="{Binding DeleteImageCommand}" />
+                </Grid>
+                <ComboBox x:Name="cmbClass" IsEditable="True" IsTextSearchEnabled="True" ToolTip="Class" Margin="0,10" />
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="btnSave" Content="Save" Margin="0,0,10,0" Width="50" />
+                    <Button x:Name="btnDiscard" Content="Discard" Width="50" />
                 </StackPanel>
+
             </StackPanel>
         </Grid>
 

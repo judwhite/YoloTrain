@@ -27,6 +27,7 @@ namespace YoloTrain.Views
         int CurrentImagePosition { get; set; }
         ObservableCollection<string> Classes { get; }
         ObservableCollection<YoloCoords> ImageRegions { get; }
+        int? SelectedRegionIndex { get; }
 
         ICommand MoveLeftCommand { get; }
         ICommand MoveRightCommand { get; }
@@ -53,10 +54,10 @@ namespace YoloTrain.Views
             ChangeImageCommand = new DelegateCommand<int>(ChangeImage);
             SelectRegionCommand = new DelegateCommand<int>(SelectRegion);
 
-            MoveLeftCommand = new DelegateCommand(() => ChangeImageBounds(-1, 0, 0, 0));
-            MoveRightCommand = new DelegateCommand(() => ChangeImageBounds(1, 0, 0, 0));
-            MoveUpCommand = new DelegateCommand(() => ChangeImageBounds(0, -1, 0, 0));
-            MoveDownCommand = new DelegateCommand(() => ChangeImageBounds(0, 1, 0, 0));
+            MoveLeftCommand = new DelegateCommand(() => ChangeImageBounds(1, 0, 0, 0));
+            MoveRightCommand = new DelegateCommand(() => ChangeImageBounds(-1, 0, 0, 0));
+            MoveUpCommand = new DelegateCommand(() => ChangeImageBounds(0, 1, 0, 0));
+            MoveDownCommand = new DelegateCommand(() => ChangeImageBounds(0, -1, 0, 0));
             GrowVerticalCommand = new DelegateCommand(() => ChangeImageBounds(0, 0, 0, 1));
             ShrinkVerticalCommand = new DelegateCommand(() => ChangeImageBounds(0, 0, 0, -1));
             GrowHorizontalCommand = new DelegateCommand(() => ChangeImageBounds(0, 0, 1, 0));
@@ -430,7 +431,58 @@ namespace YoloTrain.Views
 
         private void ChangeImageBounds(int x, int y, int w, int h)
         {
-            // TODO (judwhite)
+            var idx = SelectedRegionIndex;
+            if (idx == null)
+                return;
+
+            var region = ImageRegions[idx.Value];
+            var img = CurrentBitmap;
+
+            var dx = 1.0 / img.Width;
+            var dy = 1.0 / img.Height;
+
+            region.X += dx * x + dx * w / 2.0;
+            region.Y += dy * y + dy * h / 2.0;
+            region.Width += dx * w;
+            region.Height += dy * h;
+
+            if (region.X < 0 ||
+                region.X > 1 ||
+                region.Y < 0 ||
+                region.Y > 1)
+            {
+                return;
+            }
+
+            if (region.Y + region.Height / 2.0 > 1 ||
+                region.Y - region.Height / 2.0 < 0 ||
+                region.X + region.Width / 2.0 > 1 ||
+                region.X + region.Width / 2.0 < 0)
+            {
+                return;
+            }
+
+            ImageRegions[idx.Value] = region;
+
+            RaisePropertyChanged(nameof(ImageRegions), null, null);
+            SelectedRegionIndex = idx.Value;
+            RaisePropertyChanged(nameof(SelectedRegionIndex), null, null);
+
+            SaveImageRegions();
+        }
+
+        private void SaveImageRegions()
+        {
+            string txtFileName = Path.GetFileNameWithoutExtension(CurrentImage) + ".txt";
+            txtFileName = Path.Combine(Path.GetDirectoryName(CurrentImage), txtFileName);
+            var sb = new StringBuilder();
+            foreach (var r in ImageRegions)
+            {
+                if (r.Class == null)
+                    continue;
+                sb.AppendLine($"{r.Class.Value} {r.X:0.000000} {r.Y:0.000000} {r.Width:0.000000} {r.Height:0.000000}");
+            }
+            File.WriteAllText(txtFileName, sb.ToString());
         }
 
         private void NewProject()
@@ -500,6 +552,7 @@ namespace YoloTrain.Views
         private void OnCurrentImageChanged()
         {
             UpdateImageRegions();
+            SelectedRegionIndex = null;
 
             if (string.IsNullOrWhiteSpace(CurrentImage))
             {
