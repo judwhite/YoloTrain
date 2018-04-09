@@ -9,5 +9,6 @@
     <converters:IsEqualToVisibilityConverter x:Key="IsEqualToVisibilityConverter" />
     <converters:IsEqualToBoolConverter x:Key="IsEqualToBoolConverter" />
     <converters:MultiAddConverter x:Key="MultiAddConverter" />
+    <converters:NullToHiddenConverter x:Key="NullToHiddenConverter" />
 
 </ResourceDictionary>

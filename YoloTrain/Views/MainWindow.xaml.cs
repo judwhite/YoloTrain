@@ -137,6 +137,7 @@ namespace YoloTrain.Views
             {
                 _isLeftMouseButtonDown = true;
                 _origMouseDownPoint = e.GetPosition(imgTrain);
+                _viewModel.SelectRegion(null);
 
                 imgTrain.CaptureMouse();
 
@@ -159,9 +160,14 @@ namespace YoloTrain.Views
                 e.Handled = true;
 
                 var box = GetMouseBoxRectangle(curMouseDownPoint, imgOffset);
+                if (box.Height < 1 || box.Width < 1)
+                    return;
+
                 var img = _viewModel.CurrentBitmap;
                 var yoloCoords = Coords.ViewportCoordsToYoloCoords(img, imgTrain, imgOffset, box);
-                ShowYolo(yoloCoords);
+
+                _viewModel.ImageRegions.Add(yoloCoords);
+                _viewModel.SelectRegion(_viewModel.ImageRegions.Count - 1);
             }
         }
 
@@ -236,7 +242,7 @@ namespace YoloTrain.Views
                     var markedRegion = new MarkedRegion
                     {
                         // TODO (judwhite): check for out of bounds class number
-                        Text = _viewModel.Classes[yolo.Class.Value].Replace('_', ' '),
+                        Text = _viewModel.Classes[yolo.Class ?? 0].Replace('_', ' '),
                         RegionIndex = i,
                         YoloCoords = yolo,
                         Height = height,

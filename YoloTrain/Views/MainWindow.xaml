@@ -98,7 +98,7 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="0">
+            <StackPanel Grid.Row="0" Visibility="{Binding Path=SelectedRegionIndex, Converter={StaticResource NullToHiddenConverter}, Mode=OneWay}">
                 <TextBlock x:Name="txtCoords" />
                 <Grid>
                     <Grid.RowDefinitions>

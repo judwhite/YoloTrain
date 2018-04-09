@@ -85,6 +85,7 @@
     <Compile Include="Converters\BoolToVisibilityConverter.cs" />
     <Compile Include="Converters\ImageThumbnailConverter.cs" />
     <Compile Include="Converters\IsEqualToBoolConverter.cs" />
+    <Compile Include="Converters\NullToHiddenConverter.cs" />
     <Compile Include="Converters\IsEqualToVisibilityConverter.cs" />
     <Compile Include="Converters\MultiAddConverter.cs" />
     <Compile Include="Converters\NullableIntConverter.cs" />

@@ -30,6 +30,8 @@ namespace YoloTrain.Views
         ObservableCollection<YoloCoords> ImageRegions { get; }
         int? SelectedRegionIndex { get; }
 
+        void SelectRegion(int? n);
+
         ICommand MoveLeftCommand { get; }
         ICommand MoveRightCommand { get; }
         ICommand MoveUpCommand { get; }
@@ -56,7 +58,7 @@ namespace YoloTrain.Views
             NextImageCommand = new DelegateCommand(NextImage);
             PreviousImageCommand = new DelegateCommand(PreviousImage);
             ChangeImageCommand = new DelegateCommand<int>(ChangeImage);
-            SelectRegionCommand = new DelegateCommand<int>(SelectRegion);
+            SelectRegionCommand = new DelegateCommand<int?>(SelectRegion);
 
             MoveLeftCommand = new DelegateCommand(() => ChangeImageBounds(1, 0, 0, 0));
             MoveRightCommand = new DelegateCommand(() => ChangeImageBounds(-1, 0, 0, 0));
@@ -435,7 +437,7 @@ namespace YoloTrain.Views
             }
         }
 
-        private void SelectRegion(int n)
+        public void SelectRegion(int? n)
         {
             SelectedRegionIndex = n;
         }
@@ -703,7 +705,11 @@ namespace YoloTrain.Views
             var region = ImageRegions[idx.Value];
             var classIndex = region.Class;
             if (classIndex == null || classIndex < 0 || classIndex >= Classes.Count)
-                return;
+            {
+                classIndex = 0;
+                region.Class = classIndex.Value;
+                ImageRegions[idx.Value] = region;
+            }
 
             SelectedRegionClass = Classes[classIndex.Value];
         }
