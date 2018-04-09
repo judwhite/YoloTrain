@@ -125,7 +125,7 @@
                     <Button Grid.Row="3" Grid.Column="0" Content="Grow Right" Width="85" Margin="2" Command="{Binding GrowHorizontalCommand}" />
                     <Button Grid.Row="3" Grid.Column="1" Content="Trim Right" Width="85" Margin="2" Command="{Binding ShrinkHorizontalCommand}" />
                     <Button Grid.Row="4" Grid.Column="0" Content="Clear Regions" Width="85" Margin="2" Command="{Binding ClearRegionsCommand}" />
-                    <Button Grid.Row="4" Grid.Column="1" Content="Delete Image" Width="85" Margin="2" Command="{Binding DeleteImageCommand}" />
+                    <Button Grid.Row="4" Grid.Column="1" Content="Delete Region" Width="85" Margin="2" Command="{Binding DeleteRegionCommand}" />
                     <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0,8,0,4">
                         <TextBlock Text="Class:" Margin="2,0,8,0" Padding="0" />
                         <ComboBox IsEditable="False" IsTextSearchEnabled="True" ItemsSource="{Binding SortedClasses, Mode=OneWay}" Text="{Binding SelectedRegionClass, Mode=TwoWay}" Width="138" />

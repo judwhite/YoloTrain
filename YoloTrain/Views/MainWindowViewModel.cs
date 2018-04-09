@@ -41,7 +41,7 @@ namespace YoloTrain.Views
         ICommand GrowHorizontalCommand { get; }
         ICommand ShrinkHorizontalCommand { get; }
         ICommand ClearRegionsCommand { get; }
-        ICommand DeleteImageCommand { get; }
+        ICommand DeleteRegionCommand { get; }
 
         ICommand AddClassCommand { get; }
     }
@@ -59,6 +59,7 @@ namespace YoloTrain.Views
             PreviousImageCommand = new DelegateCommand(PreviousImage);
             ChangeImageCommand = new DelegateCommand<int>(ChangeImage);
             SelectRegionCommand = new DelegateCommand<int?>(SelectRegion);
+            DeleteRegionCommand = new DelegateCommand(DeleteRegion);
 
             MoveLeftCommand = new DelegateCommand(() => ChangeImageBounds(1, 0, 0, 0));
             MoveRightCommand = new DelegateCommand(() => ChangeImageBounds(-1, 0, 0, 0));
@@ -184,10 +185,10 @@ namespace YoloTrain.Views
             private set => Set(nameof(ClearRegionsCommand), value);
         }
 
-        public ICommand DeleteImageCommand
+        public ICommand DeleteRegionCommand
         {
-            get => Get<ICommand>(nameof(DeleteImageCommand));
-            private set => Set(nameof(DeleteImageCommand), value);
+            get => Get<ICommand>(nameof(DeleteRegionCommand));
+            private set => Set(nameof(DeleteRegionCommand), value);
         }
 
         public ICommand AddClassCommand
@@ -681,6 +682,26 @@ namespace YoloTrain.Views
                 }
             }
             ImageRegions = list;
+        }
+
+        private void DeleteRegion()
+        {
+            var idx = SelectedRegionIndex;
+
+            if (idx == null)
+                return;
+
+            var region = ImageRegions[idx.Value];
+            var result = MessageBox($"Delete '{Classes[region.Class.Value]}' region?", "Delete region", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result != MessageBoxResult.Yes)
+                return;
+
+            ImageRegions.RemoveAt(idx.Value);
+
+            RaisePropertyChanged(nameof(ImageRegions), null, null);
+            SelectedRegionIndex = null;
+
+            SaveImageRegions();
         }
 
         private void OnClassesChanged()
