@@ -109,28 +109,32 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="100" />
+                        <ColumnDefinition Width="100" />
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Row="0" Grid.Column="0" Content="Left" Width="85" Margin="2" Command="{Binding MoveLeftCommand}" />
-                    <Button Grid.Row="0" Grid.Column="1" Content="Right" Width="85" Margin="2" Command="{Binding MoveRightCommand}" />
-                    <Button Grid.Row="1" Grid.Column="0" Content="Up" Width="85" Margin="2" Command="{Binding MoveUpCommand}" />
-                    <Button Grid.Row="1" Grid.Column="1" Content="Down" Width="85" Margin="2" Command="{Binding MoveDownCommand}" />
-                    <Button Grid.Row="2" Grid.Column="0" Content="Grow Bottom" Width="85" Margin="2" Command="{Binding GrowVerticalCommand}" />
-                    <Button Grid.Row="2" Grid.Column="1" Content="Trim Bottom" Width="85" Margin="2" Command="{Binding ShrinkVerticalCommand}" />
-                    <Button Grid.Row="3" Grid.Column="0" Content="Grow Right" Width="85" Margin="2" Command="{Binding GrowHorizontalCommand}" />
-                    <Button Grid.Row="3" Grid.Column="1" Content="Trim Right" Width="85" Margin="2" Command="{Binding ShrinkHorizontalCommand}" />
-                    <Button Grid.Row="4" Grid.Column="0" Content="Clear Regions" Width="85" Margin="2" Command="{Binding ClearRegionsCommand}" />
-                    <Button Grid.Row="4" Grid.Column="1" Content="Delete Region" Width="85" Margin="2" Command="{Binding DeleteRegionCommand}" />
-                    <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0,8,0,4">
+                    <Button Grid.Row="0" Grid.Column="0" Content="Left" Margin="2" Command="{Binding MoveLeftCommand}" />
+                    <Button Grid.Row="0" Grid.Column="1" Content="Right" Margin="2" Command="{Binding MoveRightCommand}" />
+                    <Button Grid.Row="1" Grid.Column="0" Content="Up" Margin="2" Command="{Binding MoveUpCommand}" />
+                    <Button Grid.Row="1" Grid.Column="1" Content="Down" Margin="2" Command="{Binding MoveDownCommand}" />
+                    <Button Grid.Row="2" Grid.Column="0" Content="Grow Bottom" Margin="2" Command="{Binding GrowVerticalCommand}" />
+                    <Button Grid.Row="2" Grid.Column="1" Content="Trim Bottom" Margin="2" Command="{Binding ShrinkVerticalCommand}" />
+                    <Button Grid.Row="3" Grid.Column="0" Content="Grow Right" Margin="2" Command="{Binding GrowHorizontalCommand}" />
+                    <Button Grid.Row="3" Grid.Column="1" Content="Trim Right" Margin="2" Command="{Binding ShrinkHorizontalCommand}" />
+                    <Button Grid.Row="4" Grid.Column="0" Content="Clear Regions" Margin="2" Command="{Binding ClearRegionsCommand}" />
+                    <Button Grid.Row="4" Grid.Column="1" Content="Delete Region" Margin="2" Command="{Binding DeleteRegionCommand}" />
+                    <Button Grid.Row="5" Grid.Column="0" Content="Propagate" Margin="2" Command="{Binding PropagateRegionCommand}" />
+                    <Grid Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,8,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
                         <TextBlock Text="Class:" Margin="2,0,8,0" Padding="0" />
-                        <ComboBox IsEditable="False" IsTextSearchEnabled="True" ItemsSource="{Binding SortedClasses, Mode=OneWay}" Text="{Binding SelectedRegionClass, Mode=TwoWay}" Width="138" />
-                    </StackPanel>
-                    <Button Grid.Row="6" Grid.Column="0" Content="Add Class" Width="85" Margin="2" Command="{Binding AddClassCommand}" />
+                        <ComboBox Grid.Column="1" IsEditable="False" IsTextSearchEnabled="True" ItemsSource="{Binding SortedClasses, Mode=OneWay}" Text="{Binding SelectedRegionClass, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                    </Grid>
+                    <Button Grid.Row="7" Grid.Column="0" Content="Add Class" Margin="2" Command="{Binding AddClassCommand}" />
                 </Grid>
             </StackPanel>
 

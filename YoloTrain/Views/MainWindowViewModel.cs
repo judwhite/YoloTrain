@@ -6,11 +6,13 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using Newtonsoft.Json;
 using YoloTrain.Config;
 using YoloTrain.Mvvm;
+using YoloTrain.Mvvm.ApplicationServices;
 using YoloTrain.Utils;
 using YoloTrain.Views.Project;
 
@@ -44,6 +46,7 @@ namespace YoloTrain.Views
         ICommand DeleteRegionCommand { get; }
 
         ICommand DuplicatePreviousRegionsCommand { get; }
+        ICommand PropagateRegionCommand { get; }
 
         ICommand AddClassCommand { get; }
     }
@@ -57,7 +60,7 @@ namespace YoloTrain.Views
         public MainWindowViewModel()
         {
             NewProjectCommand = new DelegateCommand(NewProject);
-            NextImageCommand = new DelegateCommand(NextImage);
+            NextImageCommand = new DelegateCommand(() => NextImage());
             PreviousImageCommand = new DelegateCommand(PreviousImage);
             ChangeImageCommand = new DelegateCommand<int>(ChangeImage);
             SelectRegionCommand = new DelegateCommand<int?>(SelectRegion);
@@ -73,6 +76,7 @@ namespace YoloTrain.Views
             ShrinkHorizontalCommand = new DelegateCommand(() => ChangeImageBounds(0, 0, -1, 0));
 
             DuplicatePreviousRegionsCommand = new DelegateCommand(DuplicatePreviousRegions);
+            PropagateRegionCommand = new DelegateCommand(PropagateRegion);
 
             AddClassCommand = new DelegateCommand(AddClass);
 
@@ -199,6 +203,12 @@ namespace YoloTrain.Views
         {
             get => Get<ICommand>(nameof(DuplicatePreviousRegionsCommand));
             set => Set(nameof(DuplicatePreviousRegionsCommand), value);
+        }
+
+        public ICommand PropagateRegionCommand
+        {
+            get => Get<ICommand>(nameof(PropagateRegionCommand));
+            set => Set(nameof(PropagateRegionCommand), value);
         }
 
         public ICommand AddClassCommand
@@ -536,12 +546,13 @@ namespace YoloTrain.Views
                 LoadProject();
         }
 
-        private void NextImage()
+        private bool NextImage()
         {
             if (ImagePaths == null || CurrentImagePosition >= ImagePaths.Count)
-                return;
+                return false;
 
             CurrentImagePosition++;
+            return true;
         }
 
         private void PreviousImage()
@@ -550,6 +561,53 @@ namespace YoloTrain.Views
                 return;
 
             CurrentImagePosition--;
+        }
+
+        private void PropagateRegion()
+        {
+            if (ImagePaths == null || CurrentImagePosition < 1 || SelectedRegionIndex == null)
+                return;
+
+            var region = ImageRegions[SelectedRegionIndex.Value];
+
+            var inputViewModel = new GetInputViewModel
+            {
+                WindowTitle = "Propagate region to next frames",
+                LabelText = "Number of frames",
+                InputValue = "1"
+            };
+
+            var result = ShowWindow<GetInputWindow>(inputViewModel);
+            if (result != true)
+                return;
+
+            int n;
+            if (!int.TryParse(inputViewModel.InputValue, out n) || n <= 0)
+                return;
+
+            var dispatcher = IoC.Resolve<IDispatcher>();
+            var wait = new AutoResetEvent(false);
+            for (int i = 0; i < n; i++)
+            {
+                dispatcher.BeginInvoke(() =>
+                {
+                    try
+                    {
+                        if (!NextImage())
+                            return;
+
+                        ImageRegions.Add(region);
+                        SaveImageRegions();
+                    }
+                    finally
+                    {
+                        wait.Set();
+                    }
+                });
+                wait.WaitOne();
+            }
+
+            UpdateImageRegions();
         }
 
         private void DuplicatePreviousRegions()
