@@ -10,6 +10,13 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
 >
+    <mvvm:UserControlView.Resources>
+        <!-- TODO (judwhite): this doesn't work; template binding TextBlock's Foreground is a PITA -->
+        <Style TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContentPresenter}}, Path=(TextElement.Foreground)}" />
+        </Style>
+    </mvvm:UserControlView.Resources>
+
     <Grid Margin="0">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -50,6 +57,7 @@
                 <SolidColorBrush x:Key="Button.Pressed.Border" Color="Blue"/>
                 <SolidColorBrush x:Key="Button.IsChecked.Background" Color="DarkBlue" Opacity="0.5"/>
                 <SolidColorBrush x:Key="Button.IsChecked.Border" Color="#FF2C628B"/>
+                <SolidColorBrush x:Key="Button.IsChecked.Foreground" Color="#FFF4F4F4"/>
                 <SolidColorBrush x:Key="Button.Disabled.Background" Color="#FFF4F4F4" Opacity="0.5"/>
                 <SolidColorBrush x:Key="Button.Disabled.Border" Color="#FFADB2B5"/>
                 <SolidColorBrush x:Key="Button.Disabled.Foreground" Color="#FF838383"/>
@@ -65,7 +73,16 @@
                         <Setter.Value>
                             <ControlTemplate TargetType="{x:Type ToggleButton}">
                                 <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="true">
-                                    <ContentPresenter x:Name="contentPresenter" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                    <ContentPresenter 
+                                        x:Name="contentPresenter" 
+                                        Focusable="False" 
+                                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                        Margin="{TemplateBinding Padding}" 
+                                        RecognizesAccessKey="True" 
+                                        SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
+                                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                        TextElement.Foreground="Black"
+                                    />
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="true">
@@ -84,6 +101,7 @@
                                     <Trigger Property="IsChecked" Value="true">
                                         <Setter Property="Background" TargetName="border" Value="{StaticResource Button.IsChecked.Background}"/>
                                         <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource Button.IsChecked.Border}"/>
+                                        <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{StaticResource Button.IsChecked.Foreground}"/>
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
@@ -95,7 +113,6 @@
             <ToggleButton.Content>
                 <TextBlock
                     Text="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type mvvm:UserControlView}}, Path=Text, Mode=OneWay}"
-                    Foreground="Black"
                     FontStretch="Condensed"
                     FontWeight="Bold"
                     LineStackingStrategy="BlockLineHeight"
