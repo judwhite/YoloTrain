@@ -98,12 +98,12 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <Image Grid.Row="1" x:Name="imgPreview" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,10" />
-
             <StackPanel Grid.Row="0">
                 <TextBlock x:Name="txtCoords" />
                 <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -124,16 +124,18 @@
                     <Button Grid.Row="2" Grid.Column="1" Content="Trim Bottom" Width="85" Margin="2" Command="{Binding ShrinkVerticalCommand}" />
                     <Button Grid.Row="3" Grid.Column="0" Content="Grow Right" Width="85" Margin="2" Command="{Binding GrowHorizontalCommand}" />
                     <Button Grid.Row="3" Grid.Column="1" Content="Trim Right" Width="85" Margin="2" Command="{Binding ShrinkHorizontalCommand}" />
-                    <Button Grid.Row="4" Grid.Column="0" Content="Clear Regions"  Width="85" Margin="2" Command="{Binding ClearRegionsCommand}" />
-                    <Button Grid.Row="4" Grid.Column="1" Content="Delete Image"  Width="85" Margin="2" Command="{Binding DeleteImageCommand}" />
+                    <Button Grid.Row="4" Grid.Column="0" Content="Clear Regions" Width="85" Margin="2" Command="{Binding ClearRegionsCommand}" />
+                    <Button Grid.Row="4" Grid.Column="1" Content="Delete Image" Width="85" Margin="2" Command="{Binding DeleteImageCommand}" />
+                    <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0,8,0,4">
+                        <TextBlock Text="Class:" Margin="2,0,8,0" Padding="0" />
+                        <ComboBox IsEditable="False" IsTextSearchEnabled="True" ItemsSource="{Binding SortedClasses, Mode=OneWay}" Text="{Binding SelectedRegionClass, Mode=TwoWay}" Width="138" />
+                    </StackPanel>
+                    <Button Grid.Row="6" Grid.Column="0" Content="Add Class" Width="85" Margin="2" Command="{Binding AddClassCommand}" />
                 </Grid>
-                <ComboBox x:Name="cmbClass" IsEditable="True" IsTextSearchEnabled="True" ToolTip="Class" Margin="0,10" />
-                <StackPanel Orientation="Horizontal">
-                    <Button x:Name="btnSave" Content="Save" Margin="0,0,10,0" Width="50" />
-                    <Button x:Name="btnDiscard" Content="Discard" Width="50" />
-                </StackPanel>
-
             </StackPanel>
+
+            <Image Grid.Row="1" x:Name="imgPreview" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,10" />
+
         </Grid>
 
         <Canvas x:Name="dragSelectionCanvas" Grid.Row="0" Grid.Column="0" Grid.RowSpan="3" Grid.ColumnSpan="2" Visibility="Collapsed">

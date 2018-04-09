@@ -26,6 +26,7 @@ namespace YoloTrain.Views
         Bitmap CurrentBitmap { get; }
         int CurrentImagePosition { get; set; }
         ObservableCollection<string> Classes { get; }
+        ObservableCollection<string> SortedClasses { get; }
         ObservableCollection<YoloCoords> ImageRegions { get; }
         int? SelectedRegionIndex { get; }
 
@@ -73,19 +74,17 @@ namespace YoloTrain.Views
         private void MainWindowViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(CurrentImage))
-            {
                 OnCurrentImageChanged();
-            }
-
             if (e.PropertyName == nameof(ImagePaths))
-            {
                 OnImagePathsChanged();
-            }
-
             if (e.PropertyName == nameof(CurrentImagePosition))
-            {
                 OnCurrentImagePositionChanged();
-            }
+            if (e.PropertyName == nameof(Classes))
+                OnClassesChanged();
+            if (e.PropertyName == nameof(SelectedRegionIndex))
+                OnSelectedRegionIndexChanged();
+            if (e.PropertyName == nameof(SelectedRegionClass))
+                OnSelectedRegionClassChanged();
         }
 
         public ICommand NewProjectCommand
@@ -236,6 +235,12 @@ namespace YoloTrain.Views
         {
             get => Get<ObservableCollection<string>>(nameof(Classes));
             private set => Set(nameof(Classes), value);
+        }
+
+        public ObservableCollection<string> SortedClasses
+        {
+            get => Get<ObservableCollection<string>>(nameof(SortedClasses));
+            private set => Set(nameof(SortedClasses), value);
         }
 
         public Bitmap CurrentBitmap
@@ -413,6 +418,12 @@ namespace YoloTrain.Views
         private void SelectRegion(int n)
         {
             SelectedRegionIndex = n;
+        }
+
+        public string SelectedRegionClass
+        {
+            get => Get<string>(nameof(SelectedRegionClass));
+            set => Set(nameof(SelectedRegionClass), value);
         }
 
         public int? SelectedRegionIndex
@@ -612,6 +623,60 @@ namespace YoloTrain.Views
                 }
             }
             ImageRegions = list;
+        }
+
+        private void OnClassesChanged()
+        {
+            if (Classes == null)
+            {
+                SortedClasses = null;
+                return;
+            }
+
+            SortedClasses = new ObservableCollection<string>(Classes.OrderBy(p => p.ToLowerInvariant()));
+        }
+
+        private void OnSelectedRegionIndexChanged()
+        {
+            var idx = SelectedRegionIndex;
+            if (idx == null)
+                return;
+            if (Classes == null || ImageRegions == null)
+                return;
+
+            var region = ImageRegions[idx.Value];
+            var classIndex = region.Class;
+            if (classIndex == null || classIndex < 0 || classIndex >= Classes.Count)
+                return;
+
+            SelectedRegionClass = Classes[classIndex.Value];
+        }
+
+        private void OnSelectedRegionClassChanged()
+        {
+            var idx = SelectedRegionIndex;
+            if (idx == null)
+                return;
+            if (string.IsNullOrWhiteSpace(SelectedRegionClass))
+                return;
+
+            int classIndex = Classes.IndexOf(SelectedRegionClass);
+            if (classIndex == -1)
+            {
+                SelectedRegionClass = null;
+                return;
+            }
+
+            var region = ImageRegions[idx.Value];
+            region.Class = classIndex;
+
+            ImageRegions[idx.Value] = region;
+
+            RaisePropertyChanged(nameof(ImageRegions), null, null);
+            SelectedRegionIndex = idx.Value;
+            RaisePropertyChanged(nameof(SelectedRegionIndex), null, null);
+
+            SaveImageRegions();
         }
     }
 }
