@@ -43,6 +43,8 @@ namespace YoloTrain.Views
         ICommand ClearRegionsCommand { get; }
         ICommand DeleteRegionCommand { get; }
 
+        ICommand DuplicatePreviousRegionsCommand { get; }
+
         ICommand AddClassCommand { get; }
     }
 
@@ -69,6 +71,8 @@ namespace YoloTrain.Views
             ShrinkVerticalCommand = new DelegateCommand(() => ChangeImageBounds(0, 0, 0, -1));
             GrowHorizontalCommand = new DelegateCommand(() => ChangeImageBounds(0, 0, 1, 0));
             ShrinkHorizontalCommand = new DelegateCommand(() => ChangeImageBounds(0, 0, -1, 0));
+
+            DuplicatePreviousRegionsCommand = new DelegateCommand(DuplicatePreviousRegions);
 
             AddClassCommand = new DelegateCommand(AddClass);
 
@@ -189,6 +193,12 @@ namespace YoloTrain.Views
         {
             get => Get<ICommand>(nameof(DeleteRegionCommand));
             private set => Set(nameof(DeleteRegionCommand), value);
+        }
+
+        public ICommand DuplicatePreviousRegionsCommand
+        {
+            get => Get<ICommand>(nameof(DuplicatePreviousRegionsCommand));
+            set => Set(nameof(DuplicatePreviousRegionsCommand), value);
         }
 
         public ICommand AddClassCommand
@@ -542,6 +552,26 @@ namespace YoloTrain.Views
             CurrentImagePosition--;
         }
 
+        private void DuplicatePreviousRegions()
+        {
+            if (ImagePaths == null || CurrentImagePosition <= 1)
+                return;
+
+            string previousImagePath = ImagePaths[CurrentImagePosition - 2];
+            string currentImagePath = CurrentImage;
+
+            string previousBoundsPath = GetImageBoundsFileName(previousImagePath);
+            if (!File.Exists(previousBoundsPath))
+            {
+                // TODO (judwhite): message user?
+                return;
+            }
+
+            string currentBoundsPath = GetImageBoundsFileName(currentImagePath);
+            File.Copy(previousBoundsPath, currentBoundsPath, overwrite: true);
+            OnCurrentImageChanged();
+        }
+
         private void AddClass()
         {
             var viewModel = new GetInputViewModel
@@ -648,14 +678,18 @@ namespace YoloTrain.Views
             }
         }
 
+        private static string GetImageBoundsFileName(string imageFileName)
+        {
+            string imageDirectory = Path.GetDirectoryName(imageFileName);
+            return Path.Combine(imageDirectory, Path.GetFileNameWithoutExtension(imageFileName) + ".txt");
+        }
+
         private void UpdateImageRegions()
         {
             if (string.IsNullOrWhiteSpace(CurrentImage))
                 return;
 
-            string imageDirectory = Path.GetDirectoryName(CurrentImage);
-            string imageBoundsFileName =
-                Path.Combine(imageDirectory, Path.GetFileNameWithoutExtension(CurrentImage) + ".txt");
+            string imageBoundsFileName = GetImageBoundsFileName(CurrentImage);
 
             var list = new ObservableCollection<YoloCoords>();
             if (File.Exists(imageBoundsFileName))
