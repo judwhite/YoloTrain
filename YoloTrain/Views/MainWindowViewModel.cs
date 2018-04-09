@@ -40,12 +40,15 @@ namespace YoloTrain.Views
         ICommand ShrinkHorizontalCommand { get; }
         ICommand ClearRegionsCommand { get; }
         ICommand DeleteImageCommand { get; }
+
+        ICommand AddClassCommand { get; }
     }
 
     public class MainWindowViewModel : ViewModel, IMainWindowViewModel
     {
         private string _yoloProjectFileName;
         private YoloProject _yoloProject;
+        private string _yoloClassNamesFileName;
 
         public MainWindowViewModel()
         {
@@ -63,6 +66,8 @@ namespace YoloTrain.Views
             ShrinkVerticalCommand = new DelegateCommand(() => ChangeImageBounds(0, 0, 0, -1));
             GrowHorizontalCommand = new DelegateCommand(() => ChangeImageBounds(0, 0, 1, 0));
             ShrinkHorizontalCommand = new DelegateCommand(() => ChangeImageBounds(0, 0, -1, 0));
+
+            AddClassCommand = new DelegateCommand(AddClass);
 
             ExitCommand = new DelegateCommand(() => Application.Current.MainWindow.Close());
 
@@ -183,6 +188,12 @@ namespace YoloTrain.Views
             private set => Set(nameof(DeleteImageCommand), value);
         }
 
+        public ICommand AddClassCommand
+        {
+            get => Get<ICommand>(nameof(AddClassCommand));
+            private set => Set(nameof(AddClassCommand), value);
+        }
+
         public int PreviewSelectedOffset
         {
             get => Get<int>(nameof(PreviewSelectedOffset));
@@ -278,6 +289,7 @@ namespace YoloTrain.Views
             CurrentImagePosition = 0;
             _yoloProjectFileName = null;
             _yoloProject = null;
+            _yoloClassNamesFileName = null;
 
             const string yoloTrainConfigFileName = "yolotrain.cfg";
             if (!File.Exists(yoloTrainConfigFileName))
@@ -306,14 +318,8 @@ namespace YoloTrain.Views
 
                 if (parts[0].Trim() == "names")
                 {
-                    var namesFileName = Path.Combine(basePath, parts[1].Trim());
-                    if (File.Exists(namesFileName))
-                    {
-                        var classes = File.ReadAllLines(namesFileName)
-                                          .Where(p => !string.IsNullOrWhiteSpace(p))
-                                          .ToList();
-                        Classes = new ObservableCollection<string>(classes);
-                    }
+                    _yoloClassNamesFileName = Path.Combine(basePath, parts[1].Trim());
+                    LoadClassNames();
                 }
             }
 
@@ -335,6 +341,20 @@ namespace YoloTrain.Views
                 else
                     CurrentImagePosition = imageIndex + 1;
             }
+        }
+
+        private void LoadClassNames()
+        {
+            if (string.IsNullOrWhiteSpace(_yoloClassNamesFileName))
+                return;
+
+            if (!File.Exists(_yoloClassNamesFileName))
+                return;
+
+            var classes = File.ReadAllLines(_yoloClassNamesFileName)
+                              .Where(p => !string.IsNullOrWhiteSpace(p))
+                              .ToList();
+            Classes = new ObservableCollection<string>(classes);
         }
 
         public class NumericStringComparer : IComparer<string>
@@ -517,6 +537,42 @@ namespace YoloTrain.Views
                 return;
 
             CurrentImagePosition--;
+        }
+
+        private void AddClass()
+        {
+            var viewModel = new GetInputViewModel
+            {
+                WindowTitle = "Add Class",
+                LabelText = "Class name"
+            };
+
+            var result = ShowWindow<GetInputWindow>(viewModel);
+            if (result != true)
+                return;
+
+            string className = viewModel.InputValue.Trim();
+            if (Classes.Contains(className))
+            {
+                SelectedRegionClass = className;
+                MessageBox($"Class '{className}' already exists.", "Add Class", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(_yoloClassNamesFileName))
+            {
+                var list = File.ReadAllLines(_yoloClassNamesFileName).Where(p => !string.IsNullOrWhiteSpace(p)).ToList();
+                list.Add(className);
+                File.WriteAllLines(_yoloClassNamesFileName, list);
+
+                LoadClassNames();
+
+                SelectedRegionClass = className;
+            }
+            else
+            {
+                // TODO (judwhite): what if it doesn't exist?
+            }
         }
 
         private void OnCurrentImagePositionChanged()

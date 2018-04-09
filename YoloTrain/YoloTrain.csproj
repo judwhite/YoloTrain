@@ -102,6 +102,10 @@
     <Compile Include="Views\Controls\MarkedRegion.xaml.cs">
       <DependentUpon>MarkedRegion.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\GetInputViewModel.cs" />
+    <Compile Include="Views\GetInputWindow.xaml.cs">
+      <DependentUpon>GetInputWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\MainMenu.xaml.cs">
       <DependentUpon>MainMenu.xaml</DependentUpon>
     </Compile>
@@ -175,6 +179,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Controls\MarkedRegion.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\GetInputWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

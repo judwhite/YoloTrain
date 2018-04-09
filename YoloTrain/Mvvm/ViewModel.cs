@@ -133,6 +133,26 @@ namespace YoloTrain.Mvvm
             return showWindowEvent.Result;
         }
 
+        /// <summary>Shows a dialog window.</summary>
+        /// <typeparam name="T">The window type.</typeparam>
+        /// <returns>The result of <see cref="IWindow.ShowDialog()" />.</returns>
+        protected bool? ShowWindow<T>(IViewModel viewModel)
+            where T : IWindow
+        {
+            var showWindowEvent = new ShowDialogWindowEventArgs
+            {
+                IWindow = IoC.Resolve<T>(viewModel),
+            };
+
+            var handler = ShowDialogWindow;
+            if (handler != null)
+                handler(this, showWindowEvent);
+            else
+                throw new Exception("'ShowDialogWindow' event is not subscribed to.");
+
+            return showWindowEvent.Result;
+        }
+
         /// <summary>Shows the open file dialog.</summary>
         /// <param name="title">The dialog title.</param>
         /// <param name="filter">The file filter. For example, Text files (*.txt)|*.txt|All files (*.*)|*.*</param>

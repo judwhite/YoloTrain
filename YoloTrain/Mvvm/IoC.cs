@@ -24,6 +24,7 @@ namespace YoloTrain.Mvvm
             // views
             builder.RegisterType<MainWindow>();
             builder.RegisterType<NewProjectWindow>();
+            builder.RegisterType<GetInputWindow>();
 
             _container = builder.Build();
         }
@@ -31,6 +32,11 @@ namespace YoloTrain.Mvvm
         public static T Resolve<T>()
         {
             return _container.Resolve<T>();
+        }
+
+        public static T Resolve<T>(IViewModel viewModel)
+        {
+            return _container.Resolve<T>(new NamedParameter("viewModel", viewModel));
         }
     }
 }
