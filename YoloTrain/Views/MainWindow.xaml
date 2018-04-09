@@ -20,14 +20,10 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="280" />
-        </Grid.ColumnDefinitions>
 
-        <views:MainMenu x:Name="MainMenu" Grid.Row="0" Grid.ColumnSpan="2" />
+        <views:MainMenu x:Name="MainMenu" Grid.Row="0" />
 
-        <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+        <Grid Grid.Row="1" Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="100" />
@@ -79,81 +75,99 @@
 
         </Grid>
 
-        <Grid Grid.Row="2" Grid.Column="0" Margin="16,0,0,0">
-            <Image 
-                x:Name="imgTrain"  
-                HorizontalAlignment="Center" 
-                VerticalAlignment="Top" 
-                Source="{Binding CurrentImage, Mode=OneWay}" 
-                Cursor="Cross" 
-                MouseDown="imgTrain_MouseDown" 
-                MouseUp="imgTrain_MouseUp" 
-                MouseMove="imgTrain_MouseMove" 
-            />
-        </Grid>
-
-        <Grid Grid.Row="2" Grid.Column="1" Margin="10,0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-
-            <StackPanel Grid.Row="0" Visibility="{Binding Path=SelectedRegionIndex, Converter={StaticResource NullToHiddenConverter}, Mode=OneWay}">
-                <TextBlock x:Name="txtCoords" />
+        <TabControl Grid.Row="2">
+            <TabItem Header="Image">
                 <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="100" />
-                        <ColumnDefinition Width="100" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="280" />
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Row="0" Grid.Column="0" Content="Left" Margin="2" Command="{Binding MoveLeftCommand}" />
-                    <Button Grid.Row="0" Grid.Column="1" Content="Right" Margin="2" Command="{Binding MoveRightCommand}" />
-                    <Button Grid.Row="1" Grid.Column="0" Content="Up" Margin="2" Command="{Binding MoveUpCommand}" />
-                    <Button Grid.Row="1" Grid.Column="1" Content="Down" Margin="2" Command="{Binding MoveDownCommand}" />
-                    <Button Grid.Row="2" Grid.Column="0" Content="Grow Bottom" Margin="2" Command="{Binding GrowVerticalCommand}" />
-                    <Button Grid.Row="2" Grid.Column="1" Content="Trim Bottom" Margin="2" Command="{Binding ShrinkVerticalCommand}" />
-                    <Button Grid.Row="3" Grid.Column="0" Content="Grow Right" Margin="2" Command="{Binding GrowHorizontalCommand}" />
-                    <Button Grid.Row="3" Grid.Column="1" Content="Trim Right" Margin="2" Command="{Binding ShrinkHorizontalCommand}" />
-                    <Button Grid.Row="4" Grid.Column="0" Content="Clear Regions" Margin="2" Command="{Binding ClearRegionsCommand}" />
-                    <Button Grid.Row="4" Grid.Column="1" Content="Delete Region" Margin="2" Command="{Binding DeleteRegionCommand}" />
-                    <Button Grid.Row="5" Grid.Column="0" Content="Propagate" Margin="2" Command="{Binding PropagateRegionCommand}" />
-                    <Grid Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,8,0,4">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="Class:" Margin="2,0,8,0" Padding="0" />
-                        <ComboBox Grid.Column="1" IsEditable="False" IsTextSearchEnabled="True" ItemsSource="{Binding SortedClasses, Mode=OneWay}" Text="{Binding SelectedRegionClass, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+
+                    <Grid Grid.Column="0" Margin="16,0,0,0">
+                        <Image 
+                            x:Name="imgTrain"  
+                            HorizontalAlignment="Center" 
+                            VerticalAlignment="Top" 
+                            Source="{Binding CurrentImage, Mode=OneWay}" 
+                            Cursor="Cross" 
+                            MouseDown="imgTrain_MouseDown" 
+                            MouseUp="imgTrain_MouseUp" 
+                            MouseMove="imgTrain_MouseMove" 
+                        />
                     </Grid>
-                    <Button Grid.Row="7" Grid.Column="0" Content="Add Class" Margin="2" Command="{Binding AddClassCommand}" />
+
+                    <Grid Grid.Column="1" Margin="10,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Visibility="{Binding Path=SelectedRegionIndex, Converter={StaticResource NullToHiddenConverter}, Mode=OneWay}">
+                            <TextBlock x:Name="txtCoords" />
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100" />
+                                    <ColumnDefinition Width="100" />
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Row="0" Grid.Column="0" Content="Left" Margin="2" Command="{Binding MoveLeftCommand}" />
+                                <Button Grid.Row="0" Grid.Column="1" Content="Right" Margin="2" Command="{Binding MoveRightCommand}" />
+                                <Button Grid.Row="1" Grid.Column="0" Content="Up" Margin="2" Command="{Binding MoveUpCommand}" />
+                                <Button Grid.Row="1" Grid.Column="1" Content="Down" Margin="2" Command="{Binding MoveDownCommand}" />
+                                <Button Grid.Row="2" Grid.Column="0" Content="Grow Bottom" Margin="2" Command="{Binding GrowVerticalCommand}" />
+                                <Button Grid.Row="2" Grid.Column="1" Content="Trim Bottom" Margin="2" Command="{Binding ShrinkVerticalCommand}" />
+                                <Button Grid.Row="3" Grid.Column="0" Content="Grow Right" Margin="2" Command="{Binding GrowHorizontalCommand}" />
+                                <Button Grid.Row="3" Grid.Column="1" Content="Trim Right" Margin="2" Command="{Binding ShrinkHorizontalCommand}" />
+                                <Button Grid.Row="4" Grid.Column="0" Content="Clear Regions" Margin="2" Command="{Binding ClearRegionsCommand}" />
+                                <Button Grid.Row="4" Grid.Column="1" Content="Delete Region" Margin="2" Command="{Binding DeleteRegionCommand}" />
+                                <Button Grid.Row="5" Grid.Column="0" Content="Propagate" Margin="2" Command="{Binding PropagateRegionCommand}" />
+                                <Grid Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,8,0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Class:" Margin="2,0,8,0" Padding="0" />
+                                    <ComboBox Grid.Column="1" IsEditable="False" IsTextSearchEnabled="True" ItemsSource="{Binding SortedClasses, Mode=OneWay}" Text="{Binding SelectedRegionClass, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                                </Grid>
+                                <Button Grid.Row="7" Grid.Column="0" Content="Add Class" Margin="2" Command="{Binding AddClassCommand}" />
+                            </Grid>
+                        </StackPanel>
+
+                        <Image Grid.Row="1" x:Name="imgPreview" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,10" />
+
+                    </Grid>
+
+                    <Canvas x:Name="dragSelectionCanvas" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Visibility="Collapsed">
+                        <Border 
+                            x:Name="dragSelectionBorder"
+                            BorderBrush="Blue"
+                            BorderThickness="1"
+                            Background="LightBlue"
+                            CornerRadius="1"
+                            Opacity="0.5"
+                        />
+                    </Canvas>
+
+                    <Canvas x:Name="MainCanvas" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" />
+
                 </Grid>
-            </StackPanel>
 
-            <Image Grid.Row="1" x:Name="imgPreview" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,10" />
+            </TabItem>
 
-        </Grid>
+            <TabItem Header="Classes">
+                <TextBlock Text="TODO"></TextBlock>
+            </TabItem>
+        </TabControl>
 
-        <Canvas x:Name="dragSelectionCanvas" Grid.Row="0" Grid.Column="0" Grid.RowSpan="3" Grid.ColumnSpan="2" Visibility="Collapsed">
-            <Border 
-                    x:Name="dragSelectionBorder"
-                    BorderBrush="Blue"
-                    BorderThickness="1"
-                    Background="LightBlue"
-                    CornerRadius="1"
-                    Opacity="0.5"
-                />
-        </Canvas>
-
-        <Canvas x:Name="MainCanvas" Grid.Row="0" Grid.Column="0" Grid.RowSpan="3" Grid.ColumnSpan="2" />
 
     </Grid>
 </mvvm:WindowView>

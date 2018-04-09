@@ -153,7 +153,11 @@ namespace YoloTrain.Views
                 imgTrain.ReleaseMouseCapture();
 
                 Point curMouseDownPoint = e.GetPosition(imgTrain);
+
                 Point imgOffset = Coords.GetAbsolutePlacement(imgTrain);
+                Point parentOffset = Coords.GetAbsolutePlacement(MainCanvas);
+                imgOffset.X -= parentOffset.X;
+                imgOffset.Y -= parentOffset.Y;
 
                 dragSelectionCanvas.Visibility = Visibility.Collapsed;
 
@@ -176,7 +180,11 @@ namespace YoloTrain.Views
             if (_isLeftMouseButtonDown)
             {
                 Point curMouseDownPoint = e.GetPosition(imgTrain);
+
                 Point imgOffset = Coords.GetAbsolutePlacement(imgTrain);
+                Point parentOffset = Coords.GetAbsolutePlacement(MainCanvas);
+                imgOffset.X -= parentOffset.X;
+                imgOffset.Y -= parentOffset.Y;
 
                 var box = GetMouseBoxRectangle(curMouseDownPoint, imgOffset);
 
@@ -253,6 +261,10 @@ namespace YoloTrain.Views
                     MainCanvas.Children.Add(markedRegion);
 
                     Point imgOffset = Coords.GetAbsolutePlacement(imgTrain);
+                    Point parentOffset = Coords.GetAbsolutePlacement(MainCanvas);
+                    imgOffset.X -= parentOffset.X;
+                    imgOffset.Y -= parentOffset.Y;
+
                     var x = yolo.X * imgTrain.ActualWidth - width / 2.0;
                     var y = yolo.Y * imgTrain.ActualHeight - height / 2.0;
                     var left = imgOffset.X + x;
