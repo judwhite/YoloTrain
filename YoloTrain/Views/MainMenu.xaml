@@ -21,15 +21,15 @@
                 <MenuItem Header="E_xit" Command="{Binding ExitCommand}" />
             </MenuItem>
             <MenuItem Header="_Edit">
-                <MenuItem Header="Cu_t" Command="{Binding CutCommand}" InputGestureText="Ctrl+X" />
-                <MenuItem Header="_Copy" Command="{Binding CopyCommand}" InputGestureText="Ctrl+C" />
-                <MenuItem Header="_Paste" Command="{Binding PasteCommand}" InputGestureText="Ctrl+V" />
-                <MenuItem Header="_Delete" Command="{Binding DeleteCommand}" InputGestureText="Del" />
+                <MenuItem Header="Move All _Up" Command="{Binding MoveAllUpCommand}" InputGestureText="Ctrl+Up Arrow" />
+                <MenuItem Header="Move All _Down" Command="{Binding MoveAllDownCommand}" InputGestureText="Ctrl+Down Arrow" />
+                <MenuItem Header="Move All _Left" Command="{Binding MoveAllLeftCommand}" InputGestureText="Ctrl+Left Arrow" />
+                <MenuItem Header="Move All _Right" Command="{Binding MoveAllRightCommand}" InputGestureText="Ctrl+Right Arrow" />
+                <Separator />
+                <MenuItem Header="_Expand All" Command="{Binding ExpandAllCommand}" InputGestureText="Ctrl+1" />
+                <MenuItem Header="_Shrink All" Command="{Binding ShrinkAllCommand}" InputGestureText="Ctrl+2" />
                 <Separator />
                 <MenuItem Header="Duplica_te regions from previous frame" Command="{Binding DuplicatePreviousRegionsCommand}" InputGestureText="Ctrl+E" />
-                <Separator />
-                <MenuItem Header="Select _all" Command="{Binding SelectAllCommand}" InputGestureText="Ctrl+A" />
-                <MenuItem Header="_Invert selection" Command="{Binding InvertSelectionCommand}" />
             </MenuItem>
             <MenuItem Header="_View">
                 <MenuItem Header="_Hide labeled regions..." Command="{Binding ClassifyImageCommand}" InputGestureText="Ctrl+H" />

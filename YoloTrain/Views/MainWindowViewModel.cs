@@ -44,13 +44,19 @@ namespace YoloTrain.Views
         ICommand ShrinkVerticalCommand { get; }
         ICommand GrowHorizontalCommand { get; }
         ICommand ShrinkHorizontalCommand { get; }
-        ICommand ClearRegionsCommand { get; }
         ICommand DeleteRegionCommand { get; }
 
         ICommand DuplicatePreviousRegionsCommand { get; }
         ICommand PropagateRegionCommand { get; }
 
         ICommand AddClassCommand { get; }
+
+        ICommand MoveAllUpCommand { get; }
+        ICommand MoveAllDownCommand { get; }
+        ICommand MoveAllLeftCommand { get; }
+        ICommand MoveAllRightCommand { get; }
+        ICommand ExpandAllCommand { get; }
+        ICommand ShrinkAllCommand { get; }
     }
 
     public class MainWindowViewModel : ViewModel, IMainWindowViewModel
@@ -81,6 +87,13 @@ namespace YoloTrain.Views
             PropagateRegionCommand = new DelegateCommand(PropagateRegion);
 
             AddClassCommand = new DelegateCommand(AddClass);
+
+            MoveAllUpCommand = new DelegateCommand(() => MoveAll(0, -1));
+            MoveAllDownCommand = new DelegateCommand(() => MoveAll(0, 1));
+            MoveAllLeftCommand = new DelegateCommand(() => MoveAll(1, 0));
+            MoveAllRightCommand = new DelegateCommand(() => MoveAll(-1, 0));
+            ExpandAllCommand = new DelegateCommand(() => ScaleAll(1));
+            ShrinkAllCommand = new DelegateCommand(() => ScaleAll(-1));
 
             ExitCommand = new DelegateCommand(() => Application.Current.MainWindow.Close());
 
@@ -219,6 +232,42 @@ namespace YoloTrain.Views
         {
             get => Get<ICommand>(nameof(AddClassCommand));
             private set => Set(nameof(AddClassCommand), value);
+        }
+
+        public ICommand MoveAllUpCommand
+        {
+            get => Get<ICommand>(nameof(MoveAllUpCommand));
+            set => Set(nameof(MoveAllUpCommand), value);
+        }
+
+        public ICommand MoveAllDownCommand
+        {
+            get => Get<ICommand>(nameof(MoveAllDownCommand));
+            set => Set(nameof(MoveAllDownCommand), value);
+        }
+
+        public ICommand MoveAllLeftCommand
+        {
+            get => Get<ICommand>(nameof(MoveAllLeftCommand));
+            set => Set(nameof(MoveAllLeftCommand), value);
+        }
+
+        public ICommand MoveAllRightCommand
+        {
+            get => Get<ICommand>(nameof(MoveAllRightCommand));
+            set => Set(nameof(MoveAllRightCommand), value);
+        }
+
+        public ICommand ExpandAllCommand
+        {
+            get => Get<ICommand>(nameof(ExpandAllCommand));
+            set => Set(nameof(ExpandAllCommand), value);
+        }
+
+        public ICommand ShrinkAllCommand
+        {
+            get => Get<ICommand>(nameof(ShrinkAllCommand));
+            set => Set(nameof(ShrinkAllCommand), value);
         }
 
         public int PreviewSelectedOffset
@@ -489,6 +538,69 @@ namespace YoloTrain.Views
         {
             get => Get<ObservableCollection<FileRegionModel>>(nameof(MassClassImages));
             set => Set(nameof(MassClassImages), value);
+        }
+
+        private void MoveAll(int x, int y)
+        {
+            TransformAll(x, y, 0, 0);
+        }
+
+        private void ScaleAll(int scale)
+        {
+            TransformAll(scale * -1, scale * -1, scale, scale);
+        }
+
+        private void TransformAll(int x, int y, int w, int h)
+        {
+            var img = CurrentBitmap;
+
+            var dx = 1.0 / img.Width;
+            var dy = 1.0 / img.Height;
+
+            for (int i = 0; i < ImageRegions.Count; i++)
+            {
+                var region = ImageRegions[i];
+
+                region.X += dx * x + dx * w / 2.0;
+                region.Y += dy * y + dy * h / 2.0;
+                region.Width += dx * w;
+                region.Height += dy * h;
+
+                if (region.X < 0)
+                    region.X = 0;
+                if (region.Y < 0)
+                    region.Y = 0;
+                if (region.X > 1)
+                    region.X = 1;
+                if (region.Y > 1)
+                    region.Y = 1;
+
+                while (region.Y + region.Height / 2.0 > 1 ||
+                       region.Y - region.Height / 2.0 < 0)
+                {
+                    region.Height -= dy;
+                }
+
+                while (region.X + region.Width / 2.0 > 1 ||
+                    region.X + region.Width / 2.0 < 0)
+                {
+                    region.Width -= dx;
+                }
+
+                if (region.Height < dy || region.Width < dx)
+                {
+                    ImageRegions.RemoveAt(i);
+                    i--;
+                    continue;
+                }
+
+                ImageRegions[i] = region;
+            }
+
+            RaisePropertyChanged(nameof(ImageRegions), null, null);
+            RaisePropertyChanged(nameof(SelectedRegionIndex), null, null);
+
+            SaveImageRegions();
         }
 
         private void ChangeImage(int n)
