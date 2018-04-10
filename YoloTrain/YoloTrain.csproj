@@ -89,6 +89,7 @@
     <Compile Include="Converters\IsEqualToVisibilityConverter.cs" />
     <Compile Include="Converters\MultiAddConverter.cs" />
     <Compile Include="Converters\NullableIntConverter.cs" />
+    <Compile Include="Models\FileRegionModel.cs" />
     <Compile Include="Mvvm\CommandManagerHelper.cs" />
     <Compile Include="Mvvm\DelegateCommand.cs" />
     <Compile Include="Mvvm\Events\ShowSelectFolderDialogEventArgs.cs" />

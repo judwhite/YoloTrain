@@ -9,8 +9,10 @@ using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 using Newtonsoft.Json;
 using YoloTrain.Config;
+using YoloTrain.Models;
 using YoloTrain.Mvvm;
 using YoloTrain.Mvvm.ApplicationServices;
 using YoloTrain.Utils;
@@ -101,6 +103,8 @@ namespace YoloTrain.Views
                 OnSelectedRegionIndexChanged();
             if (e.PropertyName == nameof(SelectedRegionClass))
                 OnSelectedRegionClassChanged();
+            if (e.PropertyName == nameof(MassSelectedClass))
+                OnMassSelectedClassChanged();
         }
 
         public ICommand NewProjectCommand
@@ -473,6 +477,18 @@ namespace YoloTrain.Views
         {
             get => Get<int?>(nameof(SelectedRegionIndex));
             private set => Set(nameof(SelectedRegionIndex), value);
+        }
+
+        public string MassSelectedClass
+        {
+            get => Get<string>(nameof(MassSelectedClass));
+            set => Set(nameof(MassSelectedClass), value);
+        }
+
+        public ObservableCollection<FileRegionModel> MassClassImages
+        {
+            get => Get<ObservableCollection<FileRegionModel>>(nameof(MassClassImages));
+            set => Set(nameof(MassClassImages), value);
         }
 
         private void ChangeImage(int n)
@@ -852,6 +868,90 @@ namespace YoloTrain.Views
             RaisePropertyChanged(nameof(SelectedRegionIndex), null, null);
 
             SaveImageRegions();
+        }
+
+        private void OnMassSelectedClassChanged()
+        {
+            MouseHelper.SetWaitCursor();
+            var list = new ObservableCollection<FileRegionModel>();
+            try
+            {
+                if (string.IsNullOrWhiteSpace(MassSelectedClass))
+                    return;
+
+                int classIndex = Classes.IndexOf(MassSelectedClass);
+                if (classIndex == -1)
+                    return;
+
+                foreach (var imageFileName in ImagePaths)
+                {
+                    Bitmap img = null;
+
+                    if (!File.Exists(imageFileName))
+                        continue;
+
+                    var fileName = GetImageBoundsFileName(imageFileName);
+                    if (!File.Exists(fileName))
+                        continue;
+
+                    var lines = File.ReadAllLines(fileName);
+                    for (int i = 0; i < lines.Length; i++)
+                    {
+                        var line = lines[i];
+                        var parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length != 5)
+                            continue;
+
+                        if (!int.TryParse(parts[0], out var idx))
+                            continue;
+
+                        if (idx != classIndex)
+                            continue;
+
+                        if (img == null)
+                            img = new Bitmap(Image.FromFile(imageFileName));
+
+                        var yoloCoords = new YoloCoords
+                        {
+                            Class = idx,
+                            X = double.Parse(parts[1]),
+                            Y = double.Parse(parts[2]),
+                            Width = double.Parse(parts[3]),
+                            Height = double.Parse(parts[4])
+                        };
+
+                        var rwidth = (int)(yoloCoords.Width * img.Width);
+                        var rheight = (int)(yoloCoords.Height * img.Height);
+                        var imgx = (int)(yoloCoords.X * img.Width - rwidth / 2.0);
+                        var imgy = (int)(yoloCoords.Y * img.Height - rheight / 2.0);
+
+                        var rect = new Rectangle(imgx, imgy, rwidth, rheight);
+                        var newImg = img.Clone(rect, img.PixelFormat);
+
+                        var bmpsource = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                            newImg.GetHbitmap(),
+                            IntPtr.Zero,
+                            Int32Rect.Empty,
+                            BitmapSizeOptions.FromWidthAndHeight(rwidth, rheight)
+                        );
+
+                        var item = new FileRegionModel
+                        {
+                            FileName = fileName,
+                            YoloCoords = yoloCoords,
+                            FileLineIndex = i,
+                            BitmapImage = bmpsource
+                        };
+
+                        list.Add(item);
+                    }
+                }
+            }
+            finally
+            {
+                MassClassImages = list;
+                MouseHelper.ResetCursor();
+            }
         }
     }
 }

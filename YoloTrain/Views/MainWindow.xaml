@@ -164,7 +164,36 @@
             </TabItem>
 
             <TabItem Header="Classes">
-                <TextBlock Text="TODO"></TextBlock>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" Grid.Column="0" Margin="0,8,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="200" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Class:" Margin="2,0,8,0" Padding="0" />
+                        <ComboBox Grid.Column="1" IsEditable="False" IsTextSearchEnabled="True" ItemsSource="{Binding SortedClasses, Mode=OneWay}" Text="{Binding MassSelectedClass, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                    </Grid>
+
+                    <ListView Grid.Row="1" ItemsSource="{Binding MassClassImages, Mode=OneWay}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="5" HorizontalAlignment="Stretch" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Image Source="{Binding BitmapImage}" Height="128" Width="128" Stretch="Uniform" />
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+
+                    </ListView>
+
+                </Grid>
             </TabItem>
         </TabControl>
 
