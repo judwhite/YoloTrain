@@ -86,48 +86,38 @@ namespace YoloTrain.Views.Project
             MouseHelper.SetWaitCursor();
             try
             {
-                const int classes = 0;
-                const int filters = (classes + 5) * 3;
-
-                string yoloTemplate = File.ReadAllText(Path.Combine("darknet", "yolov3.cfg.template"));
-                string yoloCfg = yoloTemplate
-                    .Replace("%batch%", BatchSize.ToString())
-                    .Replace("%subdivisions%", Subdivisions.ToString())
-                    .Replace("%width%", HeightWidth.ToString())
-                    .Replace("%height%", HeightWidth.ToString())
-                    .Replace("%filters%", filters.ToString())
-                    .Replace("%classes%", classes.ToString())
-                    .Replace("%anchors%", "10,13,  16,30,  33,23,  30,61,  62,45,  59,119,  116,90,  156,198,  373,326")
-                    .Replace("%random%", IsRandomChecked ? "1" : "0")
-                    .Replace("%max%", MaxObjects.ToString());
-
-                Directory.CreateDirectory(Path.GetDirectoryName(YoloConfigFile));
-                File.WriteAllText(YoloConfigFile, yoloCfg);
-
-                string objDataTemplate = File.ReadAllText(Path.Combine("darknet", "obj.data.template"));
-                string objData = objDataTemplate
-                    .Replace("%classes%", classes.ToString())
-                    .Replace("%train%", TrainFileName)
-                    .Replace("%valid%", ValidFileName)
-                    .Replace("%names%", ClassNamesFileName)
-                    .Replace("%backup%", BackupFolder);
-
-                Directory.CreateDirectory(Path.GetDirectoryName(ObjDataFile));
-                File.WriteAllText(ObjDataFile, objData);
-
                 var project = new YoloProject
                 {
-                    Version = 1,
+                    Version = 2,
                     YoloVersion = "3",
                     DarknetExecutableFilePath = DarknetExecutable,
                     YoloConfigFilePath = YoloConfigFile,
                     ObjectDataFilePath = ObjDataFile,
-                    ImagesDirectory = ImagesDirectory
+                    ImagesDirectory = ImagesDirectory,
+                    ObjData = new ObjectDataConfig
+                    {
+                        Train = TrainFileName,
+                        Valid = TrainFileName,
+                        Names = ClassNamesFileName,
+                        Backup = BackupFolder
+                    },
+                    TrainConfig = new YoloTrainConfig
+                    {
+                        BatchSize = BatchSize.Value,
+                        Subdivisions = Subdivisions.Value,
+                        Height = HeightWidth.Value,
+                        Width = HeightWidth.Value,
+                        Random = IsRandomChecked,
+                        Max = MaxObjects ?? 30
+                    },
                 };
 
                 string projectFullPath = Path.Combine(ProjectDirectory, ProjectFileName);
                 string projectJson = JsonConvert.SerializeObject(project);
                 File.WriteAllText(projectFullPath, projectJson);
+
+                ObjectDataConfig.SaveFromTemplate(project);
+                YoloTrainConfig.SaveFromTemplate(project, null);
 
                 var yoloConfig = new YoloTrainSettings
                 {
@@ -190,8 +180,8 @@ namespace YoloTrain.Views.Project
             {
                 // TODO (judwhite): load if exists
 
-                BatchSize = 16;
-                Subdivisions = 8;
+                BatchSize = 64;
+                Subdivisions = 32;
                 HeightWidth = 608;
                 IsRandomChecked = true;
                 MaxObjects = 150;

@@ -24,5 +24,11 @@ namespace YoloTrain.Config
 
         [JsonProperty("last_image")]
         public string LastImageFilePath { get; set; }
+
+        [JsonProperty("obj_data")]
+        public ObjectDataConfig ObjData { get; set; }
+
+        [JsonProperty("train_config")]
+        public YoloTrainConfig TrainConfig { get; set; }
     }
 }

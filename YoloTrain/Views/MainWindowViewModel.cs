@@ -59,6 +59,7 @@ namespace YoloTrain.Views
         ICommand ShrinkAllCommand { get; }
         ICommand ClearAllRegionsCommand { get; }
 
+        ICommand UpdateConfigurationFilesCommand { get; }
         ICommand ValidateBoundingBoxesCommand { get; }
     }
 
@@ -100,6 +101,7 @@ namespace YoloTrain.Views
 
             ClearAllRegionsCommand = new DelegateCommand(ClearAllRegions);
 
+            UpdateConfigurationFilesCommand = new DelegateCommand(UpdateConfigurationFiles);
             ValidateBoundingBoxesCommand = new DelegateCommand(ValidateBoundingBoxes);
             ExitCommand = new DelegateCommand(() => Application.Current.MainWindow.Close());
 
@@ -280,6 +282,12 @@ namespace YoloTrain.Views
         {
             get => Get<ICommand>(nameof(ClearAllRegionsCommand));
             set => Set(nameof(ClearAllRegionsCommand), value);
+        }
+
+        public ICommand UpdateConfigurationFilesCommand
+        {
+            get => Get<ICommand>(nameof(UpdateConfigurationFilesCommand));
+            set => Set(nameof(UpdateConfigurationFilesCommand), value);
         }
 
         public ICommand ValidateBoundingBoxesCommand
@@ -952,10 +960,10 @@ namespace YoloTrain.Views
 
             if (!string.IsNullOrWhiteSpace(_yoloProject.DarknetExecutableFilePath))
             {
-                var lowerDarknetExecutablePath = Path
-                    .GetDirectoryName(_yoloProject.DarknetExecutableFilePath).ToLowerInvariant();
+                var lowerDarknetExecutablePath = Path.GetDirectoryName(_yoloProject.DarknetExecutableFilePath).ToLowerInvariant();
+
                 if (CurrentImage.ToLowerInvariant().StartsWith(lowerDarknetExecutablePath))
-                    CurrentImageRelativeFileName = CurrentImage.Substring(lowerDarknetExecutablePath.Length + 1);
+                    CurrentImageRelativeFileName = CurrentImage.Substring(lowerDarknetExecutablePath.Length + 1).Replace('/', '\\');
                 else
                     CurrentImageRelativeFileName = CurrentImage;
             }
@@ -1025,6 +1033,22 @@ namespace YoloTrain.Views
             SelectedRegionIndex = null;
 
             SaveImageRegions();
+        }
+
+        private void UpdateConfigurationFiles()
+        {
+            MouseHelper.SetWaitCursor();
+            try
+            {
+                ObjectDataConfig.SaveFromTemplate(_yoloProject);
+                YoloTrainConfig.SaveFromTemplate(_yoloProject, null);
+            }
+            finally
+            {
+                MouseHelper.ResetCursor();
+            }
+
+            MessageBox("Configuration files updated successfully.", "Update configuration files", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void ValidateBoundingBoxes()

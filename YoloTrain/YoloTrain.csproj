@@ -81,6 +81,7 @@
     <Compile Include="Config\ObjectDataConfig.cs" />
     <Compile Include="Config\ObjectNamesConfig.cs" />
     <Compile Include="Config\YoloProject.cs" />
+    <Compile Include="Config\YoloTrainConfig.cs" />
     <Compile Include="Config\YoloTrainSettings.cs" />
     <Compile Include="Converters\BoolToVisibilityConverter.cs" />
     <Compile Include="Converters\ImageThumbnailConverter.cs" />
