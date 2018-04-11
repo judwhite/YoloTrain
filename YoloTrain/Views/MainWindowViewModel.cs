@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows;
@@ -57,6 +60,7 @@ namespace YoloTrain.Views
         ICommand MoveAllRightCommand { get; }
         ICommand ExpandAllCommand { get; }
         ICommand ShrinkAllCommand { get; }
+        ICommand ClearAllRegionsCommand { get; }
     }
 
     public class MainWindowViewModel : ViewModel, IMainWindowViewModel
@@ -88,12 +92,14 @@ namespace YoloTrain.Views
 
             AddClassCommand = new DelegateCommand(AddClass);
 
-            MoveAllUpCommand = new DelegateCommand(() => MoveAll(0, -1));
-            MoveAllDownCommand = new DelegateCommand(() => MoveAll(0, 1));
-            MoveAllLeftCommand = new DelegateCommand(() => MoveAll(1, 0));
-            MoveAllRightCommand = new DelegateCommand(() => MoveAll(-1, 0));
-            ExpandAllCommand = new DelegateCommand(() => ScaleAll(1));
-            ShrinkAllCommand = new DelegateCommand(() => ScaleAll(-1));
+            MoveAllUpCommand = new DelegateCommand(() => MoveAll(0, -2));
+            MoveAllDownCommand = new DelegateCommand(() => MoveAll(0, 2));
+            MoveAllLeftCommand = new DelegateCommand(() => MoveAll(-2, 0));
+            MoveAllRightCommand = new DelegateCommand(() => MoveAll(2, 0));
+            ExpandAllCommand = new DelegateCommand(() => DilateAll(1.01));
+            ShrinkAllCommand = new DelegateCommand(() => DilateAll(0.99));
+
+            ClearAllRegionsCommand = new DelegateCommand(ClearAllRegions);
 
             ExitCommand = new DelegateCommand(() => Application.Current.MainWindow.Close());
 
@@ -268,6 +274,12 @@ namespace YoloTrain.Views
         {
             get => Get<ICommand>(nameof(ShrinkAllCommand));
             set => Set(nameof(ShrinkAllCommand), value);
+        }
+
+        public ICommand ClearAllRegionsCommand
+        {
+            get => Get<ICommand>(nameof(ClearAllRegionsCommand));
+            set => Set(nameof(ClearAllRegionsCommand), value);
         }
 
         public int PreviewSelectedOffset
@@ -511,6 +523,20 @@ namespace YoloTrain.Views
             }
         }
 
+        private void ClearAllRegions()
+        {
+            var result = MessageBox("Clear all regions in image?", "Clear regions", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result != MessageBoxResult.Yes)
+                return;
+
+            SelectedRegionIndex = null;
+
+            ImageRegions.Clear();
+            SaveImageRegions();
+
+            RaisePropertyChanged(nameof(ImageRegions), null, null);
+        }
+
         public void SelectRegion(int? n)
         {
             SelectedRegionIndex = n;
@@ -542,29 +568,92 @@ namespace YoloTrain.Views
 
         private void MoveAll(int x, int y)
         {
-            TransformAll(x, y, 0, 0);
+            TransformAll(x, y, 0);
         }
 
-        private void ScaleAll(int scale)
+        private void DilateAll(double scale)
         {
-            TransformAll(scale * -1, scale * -1, scale, scale);
+            TransformAll(0, 0, scale);
         }
 
-        private void TransformAll(int x, int y, int w, int h)
+        private void TransformAll(int x, int y, double scale)
         {
             var img = CurrentBitmap;
 
             var dx = 1.0 / img.Width;
             var dy = 1.0 / img.Height;
 
+            double midX = 0.5;
+            double midY = 0.5;
+
+            var selectedRegionIndex = SelectedRegionIndex;
+            if (selectedRegionIndex != null)
+            {
+                midX = ImageRegions[selectedRegionIndex.Value].X;
+                midY = ImageRegions[selectedRegionIndex.Value].Y;
+            }
+
+            if (scale != 0)
+            {
+                var dscale = scale > 1 ? 0.01 : -0.01;
+
+                foreach (var region in ImageRegions)
+                {
+                    double width = region.Width * img.Width;
+                    double height = region.Height * img.Height;
+                    double newWidth = width * scale;
+                    double newHeight = height * scale;
+
+                    // figure out smallest scale to increase all regions by at least 2px
+                    // if image is going to go out of viewport don't include its scale (could be very small
+                    // if it's getting smashed against a boundary)
+                    var localScale = scale;
+                    while (Math.Abs(newWidth - width) < 2 || Math.Abs(newHeight - height) < 2)
+                    {
+                        localScale += dscale;
+                        newWidth = width * localScale;
+                        newHeight = height * localScale;
+                    }
+
+                    var translateScale = (localScale - 1.0);
+
+                    var newX = region.X + (region.X - midX) * translateScale;
+                    var newY = region.Y + (region.Y - midY) * translateScale;
+
+                    if (newX > 0 && newY > 0 && newX < 1 && newY < 1)
+                    {
+                        scale = localScale;
+                    }
+                }
+            }
+
             for (int i = 0; i < ImageRegions.Count; i++)
             {
                 var region = ImageRegions[i];
 
-                region.X += dx * x + dx * w / 2.0;
-                region.Y += dy * y + dy * h / 2.0;
-                region.Width += dx * w;
-                region.Height += dy * h;
+                if (scale == 0)
+                {
+                    // translate
+                    region.X += dx * x;
+                    region.Y += dy * y;
+                }
+                else
+                {
+                    // scale/dilate
+                    double width = region.Width * img.Width;
+                    double height = region.Height * img.Height;
+                    double newWidth = width * scale;
+                    double newHeight = height * scale;
+
+                    // translate X/Y
+                    var translateScale = (scale - 1.0);
+
+                    region.X += (region.X - midX) * translateScale;
+                    region.Y += (region.Y - midY) * translateScale;
+
+                    region.Width = newWidth / img.Width;
+                    region.Height = newHeight / img.Height;
+                }
 
                 if (region.X < 0)
                     region.X = 0;
@@ -582,7 +671,7 @@ namespace YoloTrain.Views
                 }
 
                 while (region.X + region.Width / 2.0 > 1 ||
-                    region.X + region.Width / 2.0 < 0)
+                       region.X - region.Width / 2.0 < 0)
                 {
                     region.Width -= dx;
                 }
@@ -597,10 +686,17 @@ namespace YoloTrain.Views
                 ImageRegions[i] = region;
             }
 
-            RaisePropertyChanged(nameof(ImageRegions), null, null);
-            RaisePropertyChanged(nameof(SelectedRegionIndex), null, null);
-
             SaveImageRegions();
+            UpdateImageRegions();
+
+            for (int i = 0; i < ImageRegions.Count; i++)
+            {
+                var region = ImageRegions[i];
+                if (Math.Abs(region.X - midX) <= dx * 4 && Math.Abs(region.Y - midY) <= dy * 4)
+                {
+                    SelectedRegionIndex = i;
+                }
+            }
         }
 
         private void ChangeImage(int n)
@@ -838,7 +934,6 @@ namespace YoloTrain.Views
         private void OnCurrentImageChanged()
         {
             UpdateImageRegions();
-            SelectedRegionIndex = null;
 
             if (string.IsNullOrWhiteSpace(CurrentImage))
             {
@@ -872,6 +967,8 @@ namespace YoloTrain.Views
 
         private void UpdateImageRegions()
         {
+            SelectedRegionIndex = null;
+
             if (string.IsNullOrWhiteSpace(CurrentImage))
                 return;
 

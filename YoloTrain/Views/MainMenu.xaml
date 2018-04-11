@@ -30,6 +30,8 @@
                 <MenuItem Header="_Shrink All" Command="{Binding ShrinkAllCommand}" InputGestureText="Ctrl+2" />
                 <Separator />
                 <MenuItem Header="Duplica_te regions from previous frame" Command="{Binding DuplicatePreviousRegionsCommand}" InputGestureText="Ctrl+E" />
+                <Separator />
+                <MenuItem Header="_Clear all regions in image" Command="{Binding ClearAllRegionsCommand}" InputGestureText="Ctrl+Delete" />
             </MenuItem>
             <MenuItem Header="_View">
                 <MenuItem Header="_Hide labeled regions..." Command="{Binding ClassifyImageCommand}" InputGestureText="Ctrl+H" />
