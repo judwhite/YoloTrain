@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows;
@@ -61,6 +58,8 @@ namespace YoloTrain.Views
         ICommand ExpandAllCommand { get; }
         ICommand ShrinkAllCommand { get; }
         ICommand ClearAllRegionsCommand { get; }
+
+        ICommand ValidateBoundingBoxesCommand { get; }
     }
 
     public class MainWindowViewModel : ViewModel, IMainWindowViewModel
@@ -101,6 +100,7 @@ namespace YoloTrain.Views
 
             ClearAllRegionsCommand = new DelegateCommand(ClearAllRegions);
 
+            ValidateBoundingBoxesCommand = new DelegateCommand(ValidateBoundingBoxes);
             ExitCommand = new DelegateCommand(() => Application.Current.MainWindow.Close());
 
             PropertyChanged += MainWindowViewModel_PropertyChanged;
@@ -280,6 +280,12 @@ namespace YoloTrain.Views
         {
             get => Get<ICommand>(nameof(ClearAllRegionsCommand));
             set => Set(nameof(ClearAllRegionsCommand), value);
+        }
+
+        public ICommand ValidateBoundingBoxesCommand
+        {
+            get => Get<ICommand>(nameof(ValidateBoundingBoxesCommand));
+            set => Set(nameof(ValidateBoundingBoxesCommand), value);
         }
 
         public int PreviewSelectedOffset
@@ -1019,6 +1025,75 @@ namespace YoloTrain.Views
             SelectedRegionIndex = null;
 
             SaveImageRegions();
+        }
+
+        private void ValidateBoundingBoxes()
+        {
+            // validate train/validate files
+            MouseHelper.SetWaitCursor();
+            try
+            {
+                var imagesWithBoundsFile = new List<string>();
+                foreach (var imageFileName in ImagePaths)
+                {
+                    var boundsFileName = GetImageBoundsFileName(imageFileName);
+                    if (!File.Exists(boundsFileName))
+                        continue;
+
+                    imagesWithBoundsFile.Add(imageFileName);
+                }
+
+                if (imagesWithBoundsFile.Count == 0)
+                {
+                    throw new Exception("No bounds files found");
+                }
+
+                int lineCount = 0;
+                foreach (var imageFileName in imagesWithBoundsFile)
+                {
+                    var boundsFileName = GetImageBoundsFileName(imageFileName);
+
+                    var img = new Bitmap(Image.FromFile(imageFileName));
+                    var dx = 1.0 / img.Width;
+                    var dy = 1.0 / img.Height;
+
+                    var lines = File.ReadAllLines(boundsFileName);
+                    lineCount += lines.Length;
+                    for (int i = 0; i < lines.Length; i++)
+                    {
+                        var line = lines[i];
+                        var parts = line.Split(' ');
+                        if (parts.Length != 5)
+                            throw new Exception(string.Format("File '{0}' contains {1} parts on line {2}; expected 5", boundsFileName, parts.Length, i + 1));
+                        int classIndex = int.Parse(parts[0]);
+                        if (classIndex >= Classes.Count || classIndex < 0)
+                            throw new Exception(string.Format("File '{0}' contains an error on line {1} (class index {2} out of bounds)", boundsFileName, i + 1, classIndex));
+                        double x = double.Parse(parts[1]);
+                        double y = double.Parse(parts[2]);
+                        double w = double.Parse(parts[3]);
+                        double h = double.Parse(parts[4]);
+                        if (x < 0 || y < 0 || x >= 1 || y >= 1)
+                            throw new Exception(string.Format("File '{0}' contains an error on line {1} (x,y) out of bounds", boundsFileName, i + 1));
+                        if (w < dx * 2 || h < dy * 2)
+                            throw new Exception(string.Format("File '{0}' contains an error on line {1} (w,h) less than 2dx,2dy", boundsFileName, i + 1));
+                        if (x - (w / 2.0) < 0 || y - (h / 2.0) < 0 || x + (w / 2.0) > 1 || y + (h / 2.0) > 1)
+                            throw new Exception(string.Format("File '{0}' contains an error on line {1} (x(+/-)w/2,y(+/-h)/2) out of bounds", boundsFileName, i + 1));
+                    }
+                }
+
+                MouseHelper.ResetCursor();
+                MessageBox(
+                    $"Validation successful.\n\nFiles: {imagesWithBoundsFile.Count:#,0}\nBoxes: {lineCount:#,0}",
+                    "Validate bounding boxes",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information
+                );
+            }
+            catch (Exception e)
+            {
+                MouseHelper.ResetCursor();
+                MessageBox(e.Message, "Validate bounding boxes", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         private void OnClassesChanged()

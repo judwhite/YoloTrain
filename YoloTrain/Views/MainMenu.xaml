@@ -42,6 +42,8 @@
                 <MenuItem Header="_Train..." Command="{Binding TrainCommand}" />
                 <MenuItem Header="Run _map..." Command="{Binding MapCommand}" />
                 <Separator />
+                <MenuItem Header="Validate bounding boxes" Command="{Binding ValidateBoundingBoxesCommand}" />
+                <Separator />
                 <MenuItem Header="_Export frames from video..." Command="{Binding ExportVideoFramesCommand}" />
                 <Separator />
                 <MenuItem Header="Classify _image..." Command="{Binding ClassifyImageCommand}" />
