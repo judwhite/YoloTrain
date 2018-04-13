@@ -78,14 +78,15 @@ namespace YoloTrain.Views
             SelectRegionCommand = new DelegateCommand<int?>(SelectRegion);
             DeleteRegionCommand = new DelegateCommand(DeleteRegion);
 
-            MoveLeftCommand = new DelegateCommand(() => ChangeImageBounds(1, 0, 0, 0));
-            MoveRightCommand = new DelegateCommand(() => ChangeImageBounds(-1, 0, 0, 0));
-            MoveUpCommand = new DelegateCommand(() => ChangeImageBounds(0, 1, 0, 0));
-            MoveDownCommand = new DelegateCommand(() => ChangeImageBounds(0, -1, 0, 0));
-            GrowVerticalCommand = new DelegateCommand(() => ChangeImageBounds(0, 0, 0, 1));
-            ShrinkVerticalCommand = new DelegateCommand(() => ChangeImageBounds(0, 0, 0, -1));
-            GrowHorizontalCommand = new DelegateCommand(() => ChangeImageBounds(0, 0, 1, 0));
-            ShrinkHorizontalCommand = new DelegateCommand(() => ChangeImageBounds(0, 0, -1, 0));
+            MoveLeftCommand = new DelegateCommand(() => ChangeImageBounds(2, 0, 0, 0));
+            MoveRightCommand = new DelegateCommand(() => ChangeImageBounds(-2, 0, 0, 0));
+            MoveUpCommand = new DelegateCommand(() => ChangeImageBounds(0, 2, 0, 0));
+            MoveDownCommand = new DelegateCommand(() => ChangeImageBounds(0, -2, 0, 0));
+
+            GrowVerticalCommand = new DelegateCommand(() => ChangeImageBounds(0, 0, 0, 2));
+            ShrinkVerticalCommand = new DelegateCommand(() => ChangeImageBounds(0, 0, 0, -2));
+            GrowHorizontalCommand = new DelegateCommand(() => ChangeImageBounds(0, 0, 2, 0));
+            ShrinkHorizontalCommand = new DelegateCommand(() => ChangeImageBounds(0, 0, -2, 0));
 
             DuplicatePreviousRegionsCommand = new DelegateCommand(DuplicatePreviousRegions);
             PropagateRegionCommand = new DelegateCommand(PropagateRegion);
@@ -96,8 +97,9 @@ namespace YoloTrain.Views
             MoveAllDownCommand = new DelegateCommand(() => MoveAll(0, 2));
             MoveAllLeftCommand = new DelegateCommand(() => MoveAll(-2, 0));
             MoveAllRightCommand = new DelegateCommand(() => MoveAll(2, 0));
-            ExpandAllCommand = new DelegateCommand(() => DilateAll(1.01));
-            ShrinkAllCommand = new DelegateCommand(() => DilateAll(0.99));
+
+            ExpandAllCommand = new DelegateCommand(() => DilateAll(1.005));
+            ShrinkAllCommand = new DelegateCommand(() => DilateAll(0.995));
 
             ClearAllRegionsCommand = new DelegateCommand(ClearAllRegions);
 
@@ -609,7 +611,7 @@ namespace YoloTrain.Views
 
             if (scale != 0)
             {
-                var dscale = scale > 1 ? 0.01 : -0.01;
+                var dscale = scale - 1.0;
 
                 foreach (var region in ImageRegions)
                 {
