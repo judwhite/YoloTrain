@@ -75,7 +75,7 @@
 
         </Grid>
 
-        <TabControl Grid.Row="2">
+        <TabControl Grid.Row="2" x:Name="MainTabControl">
             <TabItem Header="Image">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -184,14 +184,15 @@
                                 <UniformGrid Columns="5" HorizontalAlignment="Stretch" />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
+
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Image Source="{Binding BitmapImage}" Height="128" Width="128" Stretch="Uniform" />
+                                <Button Style="{StaticResource ToolbarButton}" Click="ClassImage_Click">
+                                    <Image Source="{Binding BitmapImage}" Height="128" Width="128" Stretch="Uniform" />
+                                </Button>
                             </DataTemplate>
                         </ListView.ItemTemplate>
-
                     </ListView>
-
                 </Grid>
             </TabItem>
         </TabControl>

@@ -32,6 +32,7 @@ namespace YoloTrain.Views
         ObservableCollection<string> Classes { get; }
         ObservableCollection<string> SortedClasses { get; }
         ObservableCollection<YoloCoords> ImageRegions { get; }
+        ObservableCollection<string> ImagePaths { get; }
         int? SelectedRegionIndex { get; }
 
         void SelectRegion(int? n);
@@ -434,7 +435,10 @@ namespace YoloTrain.Views
                 return;
             }
 
-            var imageFiles = Directory.GetFiles(imagesDirectory, "*.jpg", SearchOption.AllDirectories).ToList();
+            var imageFiles = Directory.GetFiles(imagesDirectory, "*.jpg", SearchOption.AllDirectories)
+                .Select(p => p.Replace('/', '\\'))
+                .ToList();
+
             imageFiles.Sort(new NumericStringComparer());
             ImagePaths = new ObservableCollection<string>(imageFiles);
             if (imageFiles.Count > 0)

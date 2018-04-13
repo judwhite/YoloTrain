@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
+using YoloTrain.Models;
 using YoloTrain.Mvvm;
 using YoloTrain.Utils;
 using YoloTrain.Views.Controls;
@@ -295,6 +296,22 @@ namespace YoloTrain.Views
             {
                 //MouseHelper.ResetCursor();
             }
+        }
+
+        private void ClassImage_Click(object sender, RoutedEventArgs e)
+        {
+            var dataContext = ((FrameworkElement)sender).DataContext;
+            var model = (FileRegionModel)dataContext;
+
+            MainTabControl.SelectedIndex = 0;
+
+            string fileName = model.FileName.Replace(".txt", ".jpg");
+            int idx = _viewModel.ImagePaths.IndexOf(fileName);
+            if (idx == -1)
+                return;
+
+            _viewModel.CurrentImagePosition = idx + 1;
+            _viewModel.SelectRegion(model.FileLineIndex);
         }
     }
 }
