@@ -103,7 +103,7 @@ namespace YoloTrain.Views
 
             ClearAllRegionsCommand = new DelegateCommand(ClearAllRegions);
 
-            UpdateConfigurationFilesCommand = new DelegateCommand(UpdateConfigurationFiles);
+            UpdateConfigurationFilesCommand = new DelegateCommand(() => UpdateConfigurationFiles(true));
             ValidateBoundingBoxesCommand = new DelegateCommand(ValidateBoundingBoxes);
             ExitCommand = new DelegateCommand(() => Application.Current.MainWindow.Close());
 
@@ -1037,7 +1037,7 @@ namespace YoloTrain.Views
             SaveImageRegions();
         }
 
-        private void UpdateConfigurationFiles()
+        private void UpdateConfigurationFiles(bool showMessageBox)
         {
             MouseHelper.SetWaitCursor();
             try
@@ -1050,7 +1050,13 @@ namespace YoloTrain.Views
                 MouseHelper.ResetCursor();
             }
 
-            MessageBox("Configuration files updated successfully.", "Update configuration files", MessageBoxButton.OK, MessageBoxImage.Information);
+            if (showMessageBox)
+            {
+                MessageBox("Configuration files updated successfully.",
+                           "Update configuration files",
+                           MessageBoxButton.OK,
+                           MessageBoxImage.Information);
+            }
         }
 
         private void ValidateBoundingBoxes()
