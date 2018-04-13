@@ -90,6 +90,8 @@ namespace YoloTrain.Views
             try
             {
                 var img = _viewModel.CurrentBitmap;
+                if (img == null)
+                    return;
 
                 if (yoloCoords.Height <= double.Epsilon || yoloCoords.Width <= double.Epsilon)
                 {
@@ -154,8 +156,13 @@ namespace YoloTrain.Views
 
                 Point curMouseDownPoint = e.GetPosition(imgTrain);
 
-                Point imgOffset = Coords.GetAbsolutePlacement(imgTrain);
-                Point parentOffset = Coords.GetAbsolutePlacement(MainCanvas);
+                var testImgOffset = Coords.GetAbsolutePlacement(imgTrain);
+                var testParentOffset = Coords.GetAbsolutePlacement(MainCanvas);
+                if (testImgOffset == null || testParentOffset == null)
+                    return;
+
+                Point imgOffset = testImgOffset.Value;
+                Point parentOffset = testParentOffset.Value;
                 imgOffset.X -= parentOffset.X;
                 imgOffset.Y -= parentOffset.Y;
 
@@ -181,8 +188,13 @@ namespace YoloTrain.Views
             {
                 Point curMouseDownPoint = e.GetPosition(imgTrain);
 
-                Point imgOffset = Coords.GetAbsolutePlacement(imgTrain);
-                Point parentOffset = Coords.GetAbsolutePlacement(MainCanvas);
+                var testImgOffset = Coords.GetAbsolutePlacement(imgTrain);
+                var testParentOffset = Coords.GetAbsolutePlacement(MainCanvas);
+                if (testImgOffset == null || testParentOffset == null)
+                    return;
+
+                Point imgOffset = testImgOffset.Value;
+                Point parentOffset = testParentOffset.Value;
                 imgOffset.X -= parentOffset.X;
                 imgOffset.Y -= parentOffset.Y;
 
@@ -232,6 +244,11 @@ namespace YoloTrain.Views
 
         private void UpdateCurrentImage()
         {
+            var testImgOffset = Coords.GetAbsolutePlacement(imgTrain);
+            var testParentOffset = Coords.GetAbsolutePlacement(MainCanvas);
+            if (testImgOffset == null || testParentOffset == null)
+                return;
+
             //MouseHelper.SetWaitCursor();
             try
             {
@@ -260,8 +277,8 @@ namespace YoloTrain.Views
 
                     MainCanvas.Children.Add(markedRegion);
 
-                    Point imgOffset = Coords.GetAbsolutePlacement(imgTrain);
-                    Point parentOffset = Coords.GetAbsolutePlacement(MainCanvas);
+                    Point imgOffset = Coords.GetAbsolutePlacement(imgTrain).Value;
+                    Point parentOffset = Coords.GetAbsolutePlacement(MainCanvas).Value;
                     imgOffset.X -= parentOffset.X;
                     imgOffset.Y -= parentOffset.Y;
 

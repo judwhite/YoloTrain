@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Windows;
 using Image = System.Windows.Controls.Image;
 using Point = System.Windows.Point;
@@ -33,12 +34,19 @@ namespace YoloTrain.Utils
             };
         }
 
-        public static Point GetAbsolutePlacement(FrameworkElement element)
+        public static Point? GetAbsolutePlacement(FrameworkElement element)
         {
-            var absolutePos = element.PointToScreen(new Point(0, 0));
-            var positionMainWindow = Application.Current.MainWindow.PointToScreen(new Point(0, 0));
-            var relativePos = new Point(absolutePos.X - positionMainWindow.X, absolutePos.Y - positionMainWindow.Y);
-            return relativePos;
+            try
+            {
+                var absolutePos = element.PointToScreen(new Point(0, 0));
+                var positionMainWindow = Application.Current.MainWindow.PointToScreen(new Point(0, 0));
+                var relativePos = new Point(absolutePos.X - positionMainWindow.X, absolutePos.Y - positionMainWindow.Y);
+                return relativePos;
+            }
+            catch (InvalidOperationException)
+            {
+                return null;
+            }
         }
     }
 }
