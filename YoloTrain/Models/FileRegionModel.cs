@@ -29,5 +29,11 @@ namespace YoloTrain.Models
             get => Get<int>(nameof(FileLineIndex));
             set => Set(nameof(FileLineIndex), value);
         }
+
+        public string ClassName
+        {
+            get => Get<string>(nameof(ClassName));
+            set => Set(nameof(ClassName), value);
+        }
     }
 }

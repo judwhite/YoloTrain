@@ -103,6 +103,7 @@ namespace YoloTrain.Views
             ShrinkAllCommand = new DelegateCommand(() => DilateAll(0.995));
 
             ClearAllRegionsCommand = new DelegateCommand(ClearAllRegions);
+            RefreshSelectedImageClassImagesCommand = new DelegateCommand(RefreshSelectedImageClassImages);
 
             UpdateConfigurationFilesCommand = new DelegateCommand(() => UpdateConfigurationFiles(true));
             ValidateBoundingBoxesCommand = new DelegateCommand(ValidateBoundingBoxes);
@@ -297,6 +298,12 @@ namespace YoloTrain.Views
         {
             get => Get<ICommand>(nameof(ValidateBoundingBoxesCommand));
             set => Set(nameof(ValidateBoundingBoxesCommand), value);
+        }
+
+        public ICommand RefreshSelectedImageClassImagesCommand
+        {
+            get => Get<ICommand>(nameof(RefreshSelectedImageClassImagesCommand));
+            set => Set(nameof(RefreshSelectedImageClassImagesCommand), value);
         }
 
         public int PreviewSelectedOffset
@@ -584,6 +591,12 @@ namespace YoloTrain.Views
         {
             get => Get<ObservableCollection<FileRegionModel>>(nameof(MassClassImages));
             set => Set(nameof(MassClassImages), value);
+        }
+
+        public ObservableCollection<FileRegionModel> SelectedImageClassImages
+        {
+            get => Get<ObservableCollection<FileRegionModel>>(nameof(SelectedImageClassImages));
+            set => Set(nameof(SelectedImageClassImages), value);
         }
 
         private void MoveAll(int x, int y)
@@ -954,6 +967,7 @@ namespace YoloTrain.Views
         private void OnCurrentImageChanged()
         {
             UpdateImageRegions();
+            SelectedImageClassImages = null;
 
             if (string.IsNullOrWhiteSpace(CurrentImage))
             {
@@ -1192,18 +1206,38 @@ namespace YoloTrain.Views
 
         private void OnMassSelectedClassChanged()
         {
+            if (string.IsNullOrWhiteSpace(MassSelectedClass))
+                return;
+
+            int classIndex = Classes.IndexOf(MassSelectedClass);
+            if (classIndex == -1)
+                return;
+
+            var list = GetFileRegionModels(ImagePaths, Classes, classIndex);
+
+            MassClassImages = list;
+        }
+
+        private void RefreshSelectedImageClassImages()
+        {
+            if (string.IsNullOrWhiteSpace(CurrentImage))
+                return;
+
+            var list = GetFileRegionModels(new[] { CurrentImage }, Classes, -1);
+
+            SelectedImageClassImages = list;
+        }
+
+        private static ObservableCollection<FileRegionModel> GetFileRegionModels(ICollection<string> imagePaths, IList<string> classes, int classIndex)
+        {
             MouseHelper.SetWaitCursor();
             var list = new ObservableCollection<FileRegionModel>();
             try
             {
-                if (string.IsNullOrWhiteSpace(MassSelectedClass))
-                    return;
+                if (imagePaths == null || imagePaths.Count == 0)
+                    return list;
 
-                int classIndex = Classes.IndexOf(MassSelectedClass);
-                if (classIndex == -1)
-                    return;
-
-                foreach (var imageFileName in ImagePaths)
+                foreach (var imageFileName in imagePaths)
                 {
                     Bitmap img = null;
 
@@ -1225,7 +1259,7 @@ namespace YoloTrain.Views
                         if (!int.TryParse(parts[0], out var idx))
                             continue;
 
-                        if (idx != classIndex)
+                        if (classIndex != -1 && idx != classIndex)
                             continue;
 
                         if (img == null)
@@ -1260,18 +1294,22 @@ namespace YoloTrain.Views
                             FileName = fileName,
                             YoloCoords = yoloCoords,
                             FileLineIndex = i,
-                            BitmapImage = bmpsource
+                            BitmapImage = bmpsource,
+                            ClassName = classes[idx]
                         };
 
                         list.Add(item);
                     }
                 }
+
+                list = new ObservableCollection<FileRegionModel>(list.OrderBy(p => p.ClassName.ToLowerInvariant()));
             }
             finally
             {
-                MassClassImages = list;
                 MouseHelper.ResetCursor();
             }
+
+            return list;
         }
     }
 }

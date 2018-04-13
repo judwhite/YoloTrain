@@ -162,7 +162,35 @@
 
             </TabItem>
 
-            <TabItem Header="Classes">
+            <TabItem Header="Regions (This Image)">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Button Grid.Row="0" Grid.Column="0" Margin="0,8,0,4" Content="Refresh" HorizontalAlignment="Left" Padding="7,2" Command="{Binding RefreshSelectedImageClassImagesCommand}"/>
+
+                    <ListView Grid.Row="1" ItemsSource="{Binding SelectedImageClassImages, Mode=OneWay}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="5" HorizontalAlignment="Stretch" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical">
+                                    <Image Source="{Binding BitmapImage}" Height="128" Width="128" Stretch="Uniform" />
+                                    <TextBlock Text="{Binding ClassName}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Classes (All Images)">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
