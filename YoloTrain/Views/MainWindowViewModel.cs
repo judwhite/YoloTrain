@@ -1124,8 +1124,14 @@ namespace YoloTrain.Views
                         double h = double.Parse(parts[4]);
                         if (x < 0 || y < 0 || x >= 1 || y >= 1)
                             throw new Exception(string.Format("File '{0}' contains an error on line {1} (x,y) out of bounds", boundsFileName, i + 1));
-                        if (w < dx * 2 || h < dy * 2)
-                            throw new Exception(string.Format("File '{0}' contains an error on line {1} (w,h) less than 2dx,2dy", boundsFileName, i + 1));
+                        if (w < dx * 2)
+                            throw new Exception(string.Format("File '{0}' contains an error on line {1} w less than 2dx", boundsFileName, i + 1));
+                        if (h < dy * 2)
+                            throw new Exception(string.Format("File '{0}' contains an error on line {1} h less than 2dy", boundsFileName, i + 1));
+                        if (w < 0.01)
+                            throw new Exception(string.Format("File '{0}' contains an error on line {1} w less than 1% of total image width", boundsFileName, i + 1));
+                        if (h < 0.01)
+                            throw new Exception(string.Format("File '{0}' contains an error on line {1} h less than 1% of total image height", boundsFileName, i + 1));
                         if (x - (w / 2.0) < 0 || y - (h / 2.0) < 0 || x + (w / 2.0) > 1 || y + (h / 2.0) > 1)
                             throw new Exception(string.Format("File '{0}' contains an error on line {1} (x(+/-)w/2,y(+/-h)/2) out of bounds", boundsFileName, i + 1));
                     }
