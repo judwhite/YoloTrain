@@ -19,6 +19,35 @@ namespace YoloTrain.Config
         [JsonProperty("backup_directory")]
         public string Backup { get; set; }
 
+        public static void UpdateTrainList(YoloProject project)
+        {
+            if (project == null)
+                throw new ArgumentNullException(nameof(project));
+            if (project.ObjData == null)
+                throw new ArgumentException($"{nameof(project)}.{nameof(project.ObjData)} cannot be null", nameof(project));
+
+            var objData = project.ObjData;
+
+            var baseDir = Path.GetDirectoryName(project.DarknetExecutableFilePath);
+
+            // update train/valid files
+            var imgsDirectory = Path.Combine(baseDir, project.ImagesDirectory);
+            Directory.CreateDirectory(imgsDirectory);
+            var txtFiles = Directory.GetFiles(imgsDirectory, "*.txt", SearchOption.AllDirectories);
+            var sb = new StringBuilder();
+            foreach (var txtFile in txtFiles)
+            {
+                var jpgFile = Path.Combine(Path.GetDirectoryName(txtFile), Path.GetFileNameWithoutExtension(txtFile)) + ".jpg";
+                if (!File.Exists(jpgFile))
+                    continue;
+
+                sb.AppendLine(jpgFile.Substring(baseDir.Length + 1).Replace('\\', '/'));
+            }
+            File.WriteAllText(Path.Combine(baseDir, objData.Train), sb.ToString());
+            // TODO (judwhite): separate validation file
+            File.WriteAllText(Path.Combine(baseDir, objData.Valid), sb.ToString());
+        }
+
         public static void SaveFromTemplate(YoloProject project)
         {
             if (project == null)
@@ -38,30 +67,14 @@ namespace YoloTrain.Config
                 .Replace("%names%", objData.Names)
                 .Replace("%backup%", objData.Backup);
 
-            var baseDir = Path.GetDirectoryName(project.DarknetExecutableFilePath);
-
             // make sure backup folder exists
+            var baseDir = Path.GetDirectoryName(project.DarknetExecutableFilePath);
             var backupFolder = Path.Combine(baseDir, objData.Backup);
             Directory.CreateDirectory(backupFolder);
 
-            // update train/valid files
-            var imgsDirectory = Path.Combine(baseDir, project.ImagesDirectory);
-            Directory.CreateDirectory(imgsDirectory);
-            var txtFiles = Directory.GetFiles(imgsDirectory, "*.txt", SearchOption.AllDirectories);
-            var sb = new StringBuilder();
-            foreach (var txtFile in txtFiles)
-            {
-                var jpgFile = Path.Combine(Path.GetDirectoryName(txtFile), Path.GetFileNameWithoutExtension(txtFile)) + ".jpg";
-                if (!File.Exists(jpgFile))
-                    continue;
-
-                sb.AppendLine(jpgFile.Substring(baseDir.Length + 1).Replace('\\', '/'));
-            }
-            File.WriteAllText(Path.Combine(baseDir, objData.Train), sb.ToString());
-            // TODO (judwhite): separate validation file
-            File.WriteAllText(Path.Combine(baseDir, objData.Valid), sb.ToString());
-
             File.WriteAllText(project.ObjectDataFilePath, objDataText);
+
+            UpdateTrainList(project);
         }
 
         public static int GetTrainImageCount(YoloProject project)

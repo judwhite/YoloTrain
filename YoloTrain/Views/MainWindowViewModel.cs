@@ -113,7 +113,9 @@ namespace YoloTrain.Views
             BlackoutRegionCommand = new DelegateCommand(BlackoutRegion);
 
             UpdateConfigurationFilesCommand = new DelegateCommand(() => UpdateConfigurationFiles(true));
+            UpdateTrainingListCommand = new DelegateCommand(() => ObjectDataConfig.UpdateTrainList(_yoloProject));
             ValidateBoundingBoxesCommand = new DelegateCommand(ValidateBoundingBoxes);
+
             ExitCommand = new DelegateCommand(() => Application.Current.MainWindow.Close());
 
             PropertyChanged += MainWindowViewModel_PropertyChanged;
@@ -418,6 +420,12 @@ namespace YoloTrain.Views
         {
             get => Get<ICommand>(nameof(UpdateConfigurationFilesCommand));
             set => Set(nameof(UpdateConfigurationFilesCommand), value);
+        }
+
+        public ICommand UpdateTrainingListCommand
+        {
+            get => Get<ICommand>(nameof(UpdateTrainingListCommand));
+            set => Set(nameof(UpdateTrainingListCommand), value);
         }
 
         public ICommand ValidateBoundingBoxesCommand
