@@ -64,6 +64,8 @@ namespace YoloTrain.Views
 
         ICommand UpdateConfigurationFilesCommand { get; }
         ICommand ValidateBoundingBoxesCommand { get; }
+
+        ICommand AutoDetectCommand { get; }
     }
 
     public class MainWindowViewModel : ViewModel, IMainWindowViewModel
@@ -107,6 +109,7 @@ namespace YoloTrain.Views
             ClearAllRegionsCommand = new DelegateCommand(ClearAllRegions);
             RefreshSelectedImageClassImagesCommand = new DelegateCommand(RefreshSelectedImageClassImages);
 
+            AutoDetectCommand = new DelegateCommand(() => AutoDetect(0.10f));
             BlackoutRegionCommand = new DelegateCommand(BlackoutRegion);
 
             UpdateConfigurationFilesCommand = new DelegateCommand(() => UpdateConfigurationFiles(true));
@@ -116,6 +119,125 @@ namespace YoloTrain.Views
             PropertyChanged += MainWindowViewModel_PropertyChanged;
 
             LoadProject();
+        }
+
+        private IntPtr _detector = IntPtr.Zero; //YoloDll.FreeDetector(detector);
+
+        private void AutoDetect(float thresh)
+        {
+            if (_detector == IntPtr.Zero)
+            {
+                string backupDir = Path.Combine(Path.GetDirectoryName(_yoloProject.DarknetExecutableFilePath), _yoloProject.ObjData.Backup);
+
+                var weightFileNames = Directory.GetFiles(backupDir, "*.weights");
+                var weightFiles = new List<FileInfo>();
+                foreach (var weightFileName in weightFileNames)
+                {
+                    weightFiles.Add(new FileInfo(weightFileName));
+                }
+                var weightFile = weightFiles.OrderByDescending(p => p.LastWriteTimeUtc).FirstOrDefault();
+                if (weightFile == null)
+                {
+                    MessageBox(string.Format("No .weights files found in {0}", backupDir), "Auto detect", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                var weight_filename = weightFile.FullName;
+                var cfg_filename = _yoloProject.YoloConfigFilePath;
+
+                MouseHelper.SetWaitCursor();
+                try
+                {
+                    _detector = YoloDll.NewDetector(cfg_filename, weight_filename, 0);
+                }
+                finally
+                {
+                    MouseHelper.ResetCursor();
+                }
+            }
+
+            if (CurrentImage == null)
+                return;
+
+            MouseHelper.SetWaitCursor();
+            try
+            {
+                var image_filename = CurrentImage;
+                var dllBoxes = new BoundingBox[150];
+                GCHandle handle = GCHandle.Alloc(dllBoxes, GCHandleType.Pinned);
+                IntPtr intPtr = handle.AddrOfPinnedObject();
+
+                var count = YoloDll.Detect(_detector, image_filename, intPtr, thresh, use_mean: false);
+
+                var boxes = new List<BoundingBox>();
+                for (int i = 0; i < count; i++) // foreach (var r in ImageRegions)
+                {
+                    boxes.Add(dllBoxes[i]);
+                }
+
+                //gch.Free();
+
+                boxes = boxes.OrderByDescending(p => p.prob).ToList();
+                for (int i = 0; i < boxes.Count; i++)
+                {
+                    for (int j = i + 1; j < boxes.Count; j++)
+                    {
+                        var a = boxes[i];
+                        var b = boxes[j];
+
+                        // if boxes intersect
+                        if (a.x + a.w >= b.x && a.x <= b.x + b.w &&
+                            a.y + a.h >= b.y && a.y <= b.y + b.h)
+                        {
+                            // get area of overlap
+                            var iw = Math.Min(a.x + a.w, b.x + b.w) - Math.Max(a.x, b.x);
+                            var ih = Math.Min(a.y + a.h, b.y + b.h) - Math.Max(a.y, b.y);
+                            double iarea = iw * ih;
+                            double aarea = a.h * a.w;
+                            double barea = b.h * b.w;
+
+                            if (iarea / aarea <= 0.2 && iarea / barea <= 0.2)
+                            {
+                                // less than 20% overlap, don't remove
+                            }
+                            else
+                            {
+                                boxes.RemoveAt(j);
+                                j--;
+                            }
+                        }
+                    }
+                }
+
+                double width = CurrentBitmap.Width;
+                double height = CurrentBitmap.Height;
+
+                var imageBoundsFileName = GetImageBoundsFileName(CurrentImage);
+
+                var sb = new StringBuilder();
+                foreach (var bbox in boxes)
+                {
+                    double x = (bbox.x + bbox.w / 2.0) / width;
+                    double y = (bbox.y + bbox.h / 2.0) / height;
+                    double w = bbox.w / width;
+                    double h = bbox.h / height;
+
+                    sb.AppendLine($"{bbox.obj_id} {x:0.000000} {y:0.000000} {w:0.000000} {h:0.000000}");
+                }
+                File.WriteAllText(imageBoundsFileName, sb.ToString());
+            }
+            finally
+            {
+                MouseHelper.ResetCursor();
+            }
+
+            UpdateImageRegions();
+        }
+
+        public ICommand AutoDetectCommand
+        {
+            get => Get<ICommand>(nameof(AutoDetectCommand));
+            set => Set(nameof(AutoDetectCommand), value);
         }
 
         private void MainWindowViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
