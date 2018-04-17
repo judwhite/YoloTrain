@@ -100,6 +100,7 @@
     <Compile Include="Utils\Box.cs" />
     <Compile Include="Utils\Coords.cs" />
     <Compile Include="Utils\YoloCoords.cs" />
+    <Compile Include="Utils\YoloDll.cs" />
     <Compile Include="Views\Controls\ImagePreviewButton.xaml.cs">
       <DependentUpon>ImagePreviewButton.xaml</DependentUpon>
     </Compile>
@@ -238,6 +239,9 @@
     </Content>
     <Content Include="..\bin\yolov3.cfg.template">
       <Link>darknet\yolov3.cfg.template</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="yolo_cpp_dll.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Resource Include="images\left.png" />
