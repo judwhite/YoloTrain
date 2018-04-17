@@ -127,8 +127,9 @@
                                 <Button Grid.Row="2" Grid.Column="1" Content="Trim Bottom" Margin="2" Command="{Binding ShrinkVerticalCommand}" />
                                 <Button Grid.Row="3" Grid.Column="0" Content="Grow Right" Margin="2" Command="{Binding GrowHorizontalCommand}" />
                                 <Button Grid.Row="3" Grid.Column="1" Content="Trim Right" Margin="2" Command="{Binding ShrinkHorizontalCommand}" />
-                                <Button Grid.Row="4" Grid.Column="0" Content="Delete Region" Margin="2" Command="{Binding DeleteRegionCommand}" />
-                                <Button Grid.Row="5" Grid.Column="0" Content="Propagate" Margin="2" Command="{Binding PropagateRegionCommand}" />
+                                <Button Grid.Row="4" Grid.Column="0" Content="Propagate" Margin="2" Command="{Binding PropagateRegionCommand}" />
+                                <Button Grid.Row="4" Grid.Column="1" Content="Blackout" Margin="2" Command="{Binding BlackoutRegionCommand}" />
+                                <Button Grid.Row="5" Grid.Column="0" Content="Delete Region" Margin="2" Command="{Binding DeleteRegionCommand}" />
                                 <Grid Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,8,0,4">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />

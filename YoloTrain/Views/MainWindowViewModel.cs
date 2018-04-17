@@ -107,6 +107,8 @@ namespace YoloTrain.Views
             ClearAllRegionsCommand = new DelegateCommand(ClearAllRegions);
             RefreshSelectedImageClassImagesCommand = new DelegateCommand(RefreshSelectedImageClassImages);
 
+            BlackoutRegionCommand = new DelegateCommand(BlackoutRegion);
+
             UpdateConfigurationFilesCommand = new DelegateCommand(() => UpdateConfigurationFiles(true));
             ValidateBoundingBoxesCommand = new DelegateCommand(ValidateBoundingBoxes);
             ExitCommand = new DelegateCommand(() => Application.Current.MainWindow.Close());
@@ -306,6 +308,79 @@ namespace YoloTrain.Views
         {
             get => Get<ICommand>(nameof(RefreshSelectedImageClassImagesCommand));
             set => Set(nameof(RefreshSelectedImageClassImagesCommand), value);
+        }
+
+        public ICommand BlackoutRegionCommand
+        {
+            get => Get<ICommand>(nameof(BlackoutRegionCommand));
+            set => Set(nameof(BlackoutRegionCommand), value);
+        }
+
+        private void BlackoutRegion()
+        {
+            var result = MessageBox("Blackout pixels and remove region?",
+                                    "Blackout Region",
+                                    MessageBoxButton.YesNo,
+                                    MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes)
+                return;
+
+            var fileName = CurrentImage;
+            string backupFile = fileName + ".orig";
+            if (!File.Exists(backupFile))
+                File.Copy(CurrentImage, backupFile);
+
+            var regionIndex = SelectedRegionIndex.Value;
+
+            var region = ImageRegions[regionIndex];
+
+            SelectedRegionIndex = null;
+            var previewImages = PreviewImages;
+
+            ImageRegions.RemoveAt(regionIndex);
+            SaveImageRegions();
+
+            Blackout(fileName, region);
+        }
+
+        private void Blackout(string fileName, YoloCoords region)
+        {
+            try
+            {
+                byte[] bytes;
+
+                using (MemoryStream memory = new MemoryStream())
+                using (var img = Image.FromFile(fileName))
+                using (var g = Graphics.FromImage(img))
+                {
+                    double width = region.Width * img.Width;
+                    double height = region.Height * img.Height;
+                    double x = region.X * img.Width - width / 2.0;
+                    double y = region.Y * img.Height - height / 2.0;
+
+                    g.FillRectangle(System.Drawing.Brushes.Black, (float)x, (float)y, (float)width, (float)height);
+                    g.DrawImage(img, new System.Drawing.Point(0, 0));
+
+                    img.Save(memory, System.Drawing.Imaging.ImageFormat.Jpeg);
+                    bytes = memory.ToArray();
+                }
+
+                File.WriteAllBytes(fileName, bytes);
+            }
+            catch (Exception ex)
+            {
+                MessageBox(ex.Message, "Blackout Region", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            finally
+            {
+                CurrentImage = null;
+                CurrentBitmap = null;
+
+                CurrentImage = fileName;
+                UpdateImageRegions();
+                UpdatePreviewImages();
+            }
         }
 
         public int PreviewSelectedOffset
