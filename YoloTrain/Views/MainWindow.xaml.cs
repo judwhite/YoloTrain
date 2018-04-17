@@ -107,6 +107,11 @@ namespace YoloTrain.Views
                 var imgx = (int)(yoloCoords.X * img.Width - rwidth / 2.0);
                 var imgy = (int)(yoloCoords.Y * img.Height - rheight / 2.0);
 
+                if (imgy + rheight > img.Height)
+                    rheight = img.Height - imgy;
+                if (imgx + rwidth > img.Width)
+                    rwidth = img.Width - imgx;
+
                 var rect = new Rectangle(imgx, imgy, rwidth, rheight);
                 var newImg = img.Clone(rect, img.PixelFormat);
 
