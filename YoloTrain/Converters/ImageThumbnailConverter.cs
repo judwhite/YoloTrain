@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Windows.Data;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace YoloTrain.Converters
@@ -12,7 +13,7 @@ namespace YoloTrain.Converters
             if (values == null || values.Length != 2)
                 return null;
 
-            var viewModel = values[0] as string[];
+            var viewModel = values[0] as ImageSource[];
             if (viewModel == null)
                 return null;
 
@@ -21,7 +22,7 @@ namespace YoloTrain.Converters
             if (offset >= viewModel.Length)
                 return null;
 
-            return new BitmapImage(new Uri(viewModel[offset]));
+            return viewModel[offset];
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)

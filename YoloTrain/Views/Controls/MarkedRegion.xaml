@@ -10,13 +10,6 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
 >
-    <mvvm:UserControlView.Resources>
-        <!-- TODO (judwhite): this doesn't work; template binding TextBlock's Foreground is a PITA -->
-        <Style TargetType="{x:Type TextBlock}">
-            <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContentPresenter}}, Path=(TextElement.Foreground)}" />
-        </Style>
-    </mvvm:UserControlView.Resources>
-
     <Grid Margin="0">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -101,7 +94,6 @@
                                     <Trigger Property="IsChecked" Value="true">
                                         <Setter Property="Background" TargetName="border" Value="{StaticResource Button.IsChecked.Background}"/>
                                         <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource Button.IsChecked.Border}"/>
-                                        <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{StaticResource Button.IsChecked.Foreground}"/>
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>

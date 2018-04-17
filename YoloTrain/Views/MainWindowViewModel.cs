@@ -5,10 +5,12 @@ using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Newtonsoft.Json;
 using YoloTrain.Config;
@@ -324,9 +326,9 @@ namespace YoloTrain.Views
             private set => Set(nameof(ImageCount), value);
         }
 
-        public string[] PreviewImages
+        public ImageSource[] PreviewImages
         {
-            get => Get<string[]>(nameof(PreviewImages));
+            get => Get<ImageSource[]>(nameof(PreviewImages));
             private set => Set(nameof(PreviewImages), value);
         }
 
@@ -369,7 +371,13 @@ namespace YoloTrain.Views
         public Bitmap CurrentBitmap
         {
             get => Get<Bitmap>(nameof(CurrentBitmap));
-            private set => Set(nameof(CurrentBitmap), value);
+            private set
+            {
+                var bmp = CurrentBitmap;
+                if (bmp != null)
+                    bmp.Dispose();
+                Set(nameof(CurrentBitmap), value);
+            }
         }
 
         public ObservableCollection<YoloCoords> ImageRegions
@@ -784,8 +792,7 @@ namespace YoloTrain.Views
 
         private void SaveImageRegions()
         {
-            string txtFileName = Path.GetFileNameWithoutExtension(CurrentImage) + ".txt";
-            txtFileName = Path.Combine(Path.GetDirectoryName(CurrentImage), txtFileName);
+            var txtFileName = GetImageBoundsFileName(CurrentImage);
             var sb = new StringBuilder();
             foreach (var r in ImageRegions)
             {
@@ -927,13 +934,21 @@ namespace YoloTrain.Views
         {
             if (CurrentImagePosition <= 0)
             {
-                PreviewImages = new string[0];
+                PreviewImages = new ImageSource[0];
                 CurrentImage = null;
                 return;
             }
 
             CurrentImage = ImagePaths[CurrentImagePosition - 1];
-            var previewList = new List<string>();
+            UpdatePreviewImages();
+        }
+
+        private int _oldStart;
+        private ImageSource[] _oldPreviews = new ImageSource[0];
+
+        private void UpdatePreviewImages()
+        {
+            var previewList = new List<ImageSource>();
             int start = Math.Max(1, CurrentImagePosition - 2);
 
             // TODO (judwhite): determine how many preview images are visible on screen
@@ -943,14 +958,27 @@ namespace YoloTrain.Views
             }
             for (int i = start; i < start + 10 && i <= ImagePaths.Count; i++)
             {
-                previewList.Add(ImagePaths[i - 1]);
-                if (i == CurrentImagePosition)
+                if (i >= _oldStart && i < _oldStart + _oldPreviews.Length)
                 {
-                    PreviewSelectedOffset = i - start;
+                    previewList.Add(_oldPreviews[i - _oldStart]);
+                    continue;
+                }
+
+                using (var img = Image.FromFile(ImagePaths[i - 1]))
+                using (var bmp = new Bitmap(img))
+                {
+                    previewList.Add(BitmapCloner.Clone(bmp));
+                    if (i == CurrentImagePosition)
+                    {
+                        PreviewSelectedOffset = i - start;
+                    }
                 }
             }
             PreviewImages = previewList.ToArray();
             PreviewStartOffset = start - 1;
+
+            _oldStart = start;
+            _oldPreviews = PreviewImages;
         }
 
         private void OnImagePathsChanged()
@@ -962,6 +990,12 @@ namespace YoloTrain.Views
             }
 
             ImageCount = ImagePaths.Count;
+        }
+
+        public ImageSource CurrentImageSource
+        {
+            get => Get<ImageSource>(nameof(CurrentImageSource));
+            set => Set(nameof(CurrentImageSource), value);
         }
 
         private void OnCurrentImageChanged()
@@ -976,7 +1010,12 @@ namespace YoloTrain.Views
                 return;
             }
 
-            CurrentBitmap = new Bitmap(Image.FromFile(CurrentImage));
+            using (var img = Image.FromFile(CurrentImage))
+            {
+                CurrentBitmap = new Bitmap((Image)img.Clone());
+            }
+
+            CurrentImageSource = BitmapCloner.Clone(CurrentBitmap);
 
             if (!string.IsNullOrWhiteSpace(_yoloProject.DarknetExecutableFilePath))
             {
@@ -1103,37 +1142,39 @@ namespace YoloTrain.Views
                 {
                     var boundsFileName = GetImageBoundsFileName(imageFileName);
 
-                    var img = new Bitmap(Image.FromFile(imageFileName));
-                    var dx = 1.0 / img.Width;
-                    var dy = 1.0 / img.Height;
-
-                    var lines = File.ReadAllLines(boundsFileName);
-                    lineCount += lines.Length;
-                    for (int i = 0; i < lines.Length; i++)
+                    using (var img = new Bitmap(Image.FromFile(imageFileName)))
                     {
-                        var line = lines[i];
-                        var parts = line.Split(' ');
-                        if (parts.Length != 5)
-                            throw new Exception(string.Format("File '{0}' contains {1} parts on line {2}; expected 5", boundsFileName, parts.Length, i + 1));
-                        int classIndex = int.Parse(parts[0]);
-                        if (classIndex >= Classes.Count || classIndex < 0)
-                            throw new Exception(string.Format("File '{0}' contains an error on line {1} (class index {2} out of bounds)", boundsFileName, i + 1, classIndex));
-                        double x = double.Parse(parts[1]);
-                        double y = double.Parse(parts[2]);
-                        double w = double.Parse(parts[3]);
-                        double h = double.Parse(parts[4]);
-                        if (x < 0 || y < 0 || x >= 1 || y >= 1)
-                            throw new Exception(string.Format("File '{0}' contains an error on line {1} (x,y) out of bounds", boundsFileName, i + 1));
-                        if (w < dx * 2)
-                            throw new Exception(string.Format("File '{0}' contains an error on line {1} w less than 2dx", boundsFileName, i + 1));
-                        if (h < dy * 2)
-                            throw new Exception(string.Format("File '{0}' contains an error on line {1} h less than 2dy", boundsFileName, i + 1));
-                        if (w < 0.01)
-                            throw new Exception(string.Format("File '{0}' contains an error on line {1} w less than 1% of total image width", boundsFileName, i + 1));
-                        if (h < 0.01)
-                            throw new Exception(string.Format("File '{0}' contains an error on line {1} h less than 1% of total image height", boundsFileName, i + 1));
-                        if (x - (w / 2.0) < 0 || y - (h / 2.0) < 0 || x + (w / 2.0) > 1 || y + (h / 2.0) > 1)
-                            throw new Exception(string.Format("File '{0}' contains an error on line {1} (x(+/-)w/2,y(+/-h)/2) out of bounds", boundsFileName, i + 1));
+                        var dx = 1.0 / img.Width;
+                        var dy = 1.0 / img.Height;
+
+                        var lines = File.ReadAllLines(boundsFileName);
+                        lineCount += lines.Length;
+                        for (int i = 0; i < lines.Length; i++)
+                        {
+                            var line = lines[i];
+                            var parts = line.Split(' ');
+                            if (parts.Length != 5)
+                                throw new Exception(string.Format("File '{0}' contains {1} parts on line {2}; expected 5", boundsFileName, parts.Length, i + 1));
+                            int classIndex = int.Parse(parts[0]);
+                            if (classIndex >= Classes.Count || classIndex < 0)
+                                throw new Exception(string.Format("File '{0}' contains an error on line {1} (class index {2} out of bounds)", boundsFileName, i + 1, classIndex));
+                            double x = double.Parse(parts[1]);
+                            double y = double.Parse(parts[2]);
+                            double w = double.Parse(parts[3]);
+                            double h = double.Parse(parts[4]);
+                            if (x < 0 || y < 0 || x >= 1 || y >= 1)
+                                throw new Exception(string.Format("File '{0}' contains an error on line {1} (x,y) out of bounds", boundsFileName, i + 1));
+                            if (w < dx * 2)
+                                throw new Exception(string.Format("File '{0}' contains an error on line {1} w less than 2dx", boundsFileName, i + 1));
+                            if (h < dy * 2)
+                                throw new Exception(string.Format("File '{0}' contains an error on line {1} h less than 2dy", boundsFileName, i + 1));
+                            if (w < 0.01)
+                                throw new Exception(string.Format("File '{0}' contains an error on line {1} w less than 1% of total image width", boundsFileName, i + 1));
+                            if (h < 0.01)
+                                throw new Exception(string.Format("File '{0}' contains an error on line {1} h less than 1% of total image height", boundsFileName, i + 1));
+                            if (x - (w / 2.0) < 0 || y - (h / 2.0) < 0 || x + (w / 2.0) > 1 || y + (h / 2.0) > 1)
+                                throw new Exception(string.Format("File '{0}' contains an error on line {1} (x(+/-)w/2,y(+/-h)/2) out of bounds", boundsFileName, i + 1));
+                        }
                     }
                 }
 
@@ -1306,6 +1347,9 @@ namespace YoloTrain.Views
 
                         list.Add(item);
                     }
+
+                    if (img != null)
+                        img.Dispose();
                 }
 
                 list = new ObservableCollection<FileRegionModel>(list.OrderBy(p => p.ClassName.ToLowerInvariant()));

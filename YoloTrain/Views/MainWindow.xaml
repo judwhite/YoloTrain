@@ -86,9 +86,9 @@
                     <Grid Grid.Column="0" Margin="16,0,0,0">
                         <Image 
                             x:Name="imgTrain"  
+                            Source="{Binding CurrentImageSource, Mode=OneWay}"
                             HorizontalAlignment="Center" 
                             VerticalAlignment="Top" 
-                            Source="{Binding CurrentImage, Mode=OneWay}" 
                             Cursor="Cross" 
                             MouseDown="imgTrain_MouseDown" 
                             MouseUp="imgTrain_MouseUp" 
