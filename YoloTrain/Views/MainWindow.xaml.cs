@@ -114,13 +114,17 @@ namespace YoloTrain.Views
 
                 var rect = new Rectangle(imgx, imgy, rwidth, rheight);
                 var newImg = img.Clone(rect, img.PixelFormat);
+                var hbitmap = newImg.GetHbitmap();
 
                 var bmpsource = Imaging.CreateBitmapSourceFromHBitmap(
-                    newImg.GetHbitmap(),
+                    hbitmap,
                     IntPtr.Zero,
                     Int32Rect.Empty,
                     BitmapSizeOptions.FromWidthAndHeight(rwidth, rheight)
                 );
+
+                BitmapCloner.DeleteObject(hbitmap);
+                newImg.Dispose();
 
                 txtCoords.Text = $"x: {imgx} y: {imgy} w: {rwidth}px h: {rheight}px";
 
