@@ -344,12 +344,6 @@ namespace YoloTrain.Views
             private set => Set(nameof(ShrinkHorizontalCommand), value);
         }
 
-        public ICommand ClearRegionsCommand
-        {
-            get => Get<ICommand>(nameof(ClearRegionsCommand));
-            private set => Set(nameof(ClearRegionsCommand), value);
-        }
-
         public ICommand DeleteRegionCommand
         {
             get => Get<ICommand>(nameof(DeleteRegionCommand));
