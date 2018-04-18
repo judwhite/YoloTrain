@@ -188,6 +188,20 @@ namespace YoloTrain.Views
                 boxes = boxes.OrderByDescending(p => p.prob).ToList();
                 for (int i = 0; i < boxes.Count; i++)
                 {
+                    if (boxes[i].x + boxes[i].w > CurrentBitmap.Width)
+                    {
+                        var box = boxes[i];
+                        box.w = (uint)CurrentBitmap.Width - box.x;
+                        boxes[i] = box;
+                    }
+
+                    if (boxes[i].y + boxes[i].y > CurrentBitmap.Width)
+                    {
+                        var box = boxes[i];
+                        box.h = (uint)CurrentBitmap.Height - box.y;
+                        boxes[i] = box;
+                    }
+
                     for (int j = i + 1; j < boxes.Count; j++)
                     {
                         var a = boxes[i];
