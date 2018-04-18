@@ -218,12 +218,9 @@ namespace YoloTrain.Views
                             double aarea = a.h * a.w;
                             double barea = b.h * b.w;
 
-                            if (iarea / aarea <= 0.2 && iarea / barea <= 0.2)
+                            if (iarea / aarea > 0.75 && iarea / barea > 0.75)
                             {
-                                // less than 20% overlap, don't remove
-                            }
-                            else
-                            {
+                                // more than 75% overlap, remove
                                 boxes.RemoveAt(j);
                                 j--;
                             }
