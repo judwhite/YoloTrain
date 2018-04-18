@@ -782,10 +782,11 @@ namespace YoloTrain.Views
 
             SelectedRegionIndex = null;
 
-            ImageRegions.Clear();
-            SaveImageRegions();
+            string fileName = GetImageBoundsFileName(CurrentImage);
+            if (File.Exists(fileName))
+                File.Delete(fileName);
 
-            RaisePropertyChanged(nameof(ImageRegions), null, null);
+            UpdateImageRegions();
         }
 
         public void SelectRegion(int? n)
