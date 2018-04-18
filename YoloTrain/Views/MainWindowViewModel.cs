@@ -113,7 +113,7 @@ namespace YoloTrain.Views
             BlackoutRegionCommand = new DelegateCommand(BlackoutRegion);
 
             UpdateConfigurationFilesCommand = new DelegateCommand(() => UpdateConfigurationFiles(true));
-            UpdateTrainingListCommand = new DelegateCommand(() => ObjectDataConfig.UpdateTrainList(_yoloProject));
+            UpdateTrainingListCommand = new DelegateCommand(UpdateTrainingList);
             ValidateBoundingBoxesCommand = new DelegateCommand(ValidateBoundingBoxes);
 
             ExitCommand = new DelegateCommand(() => Application.Current.MainWindow.Close());
@@ -121,6 +121,12 @@ namespace YoloTrain.Views
             PropertyChanged += MainWindowViewModel_PropertyChanged;
 
             LoadProject();
+        }
+
+        private void UpdateTrainingList()
+        {
+            ObjectDataConfig.UpdateTrainList(_yoloProject);
+            MessageBox("Done.", "Update train.txt", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private IntPtr _detector = IntPtr.Zero; //YoloDll.FreeDetector(detector);
