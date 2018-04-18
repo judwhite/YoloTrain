@@ -31,9 +31,9 @@
                 <Separator />
                 <MenuItem Header="Duplica_te regions from previous frame" Command="{Binding DuplicatePreviousRegionsCommand}" InputGestureText="Ctrl+E" />
                 <Separator />
-                <MenuItem Header="_Clear all regions in image" Command="{Binding ClearAllRegionsCommand}" InputGestureText="Ctrl+Delete" />
+                <MenuItem Header="_Blackout selected region" Command="{Binding BlackoutRegionCommand}" InputGestureText="Ctrl+B" />
                 <Separator />
-                <MenuItem Header="Auto Detect" Command="{Binding AutoDetectCommand}" InputGestureText="Alt+2" />
+                <MenuItem Header="_Clear all regions in image" Command="{Binding ClearAllRegionsCommand}" InputGestureText="Ctrl+Delete" />
             </MenuItem>
             <MenuItem Header="_View">
                 <MenuItem Header="_Hide labeled regions..." Command="{Binding ClassifyImageCommand}" InputGestureText="Ctrl+H" />
@@ -43,6 +43,8 @@
             <MenuItem Header="_Tools">
                 <MenuItem Header="_Train..." Command="{Binding TrainCommand}" />
                 <MenuItem Header="Run _mAP..." Command="{Binding MapCommand}" />
+                <Separator />
+                <MenuItem Header="Auto Detect" Command="{Binding AutoDetectCommand}" InputGestureText="Alt+2" />
                 <Separator />
                 <MenuItem Header="Update configuration files (yolo.cfg, obj.data, train.txt)" Command="{Binding UpdateConfigurationFilesCommand}" />
                 <MenuItem Header="Update train.txt" Command="{Binding UpdateTrainingListCommand}" />
