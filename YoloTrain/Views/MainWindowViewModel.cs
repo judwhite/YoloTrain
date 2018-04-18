@@ -459,13 +459,13 @@ namespace YoloTrain.Views
 
         private void BlackoutRegion()
         {
-            var result = MessageBox("Blackout pixels and remove region?",
+            /*var result = MessageBox("Blackout pixels and remove region?",
                                     "Blackout Region",
                                     MessageBoxButton.YesNo,
                                     MessageBoxImage.Question);
 
             if (result != MessageBoxResult.Yes)
-                return;
+                return;*/
 
             var fileName = CurrentImage;
             string backupFile = fileName + ".orig";
