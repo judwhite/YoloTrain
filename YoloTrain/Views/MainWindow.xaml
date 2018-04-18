@@ -136,7 +136,7 @@
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="Class:" Margin="2,0,8,0" Padding="0" />
-                                    <ComboBox Grid.Column="1" IsEditable="False" IsTextSearchEnabled="True" ItemsSource="{Binding SortedClasses, Mode=OneWay}" Text="{Binding SelectedRegionClass, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                                    <ComboBox x:Name="SelectedRegionComboBox" Grid.Column="1" IsEditable="False" IsTextSearchEnabled="True" ItemsSource="{Binding SortedClasses, Mode=OneWay}" Text="{Binding SelectedRegionClass, Mode=TwoWay}" HorizontalAlignment="Stretch" />
                                 </Grid>
                                 <Button Grid.Row="7" Grid.Column="0" Content="Add Class" Margin="2" Command="{Binding AddClassCommand}" />
                             </Grid>

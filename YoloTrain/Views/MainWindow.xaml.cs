@@ -59,6 +59,7 @@ namespace YoloTrain.Views
             {
                 UpdateCurrentImage();
                 ShowSelectedRegionProperties();
+                SelectedRegionComboBox.Focus();
             }
         }
 
